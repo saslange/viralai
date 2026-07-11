@@ -118,7 +118,7 @@ function Card({
       )}
 
       {/* Left: Media */}
-      <div className="relative flex-1 min-w-0 bg-black">
+      <div className="relative w-1/3 min-w-0 bg-black">
         {post.thumbnail_url || post.media_url ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -168,8 +168,8 @@ function Card({
         </div>
       </div>
 
-      {/* Right: Info (scrollable) */}
-      <div className="flex flex-1 min-w-0 flex-col overflow-y-auto p-4">
+      {/* Right: Info (scrollable) - max 75% width */}
+      <div className="flex w-full max-w-[75%] flex-col overflow-y-auto p-4">
         {/* Hook */}
         <p className="mb-3 font-serif text-sm italic leading-snug text-neutral-900">
           "{post.hook ?? "Kein Hook erkannt"}"
