@@ -146,8 +146,8 @@ function Card({
         )}
       </div>
 
-      {/* Right: Info */}
-      <div className="flex w-1/2 min-w-0 flex-col overflow-hidden p-4">
+      {/* Right: Info (scrollable) */}
+      <div className="flex w-1/2 min-w-0 flex-col overflow-y-auto p-4">
         {/* Hook */}
         <p className="mb-3 font-serif text-sm italic leading-snug text-neutral-900">
           "{post.hook ?? "Kein Hook erkannt"}"
@@ -177,17 +177,29 @@ function Card({
 
         {/* Why it works */}
         {post.why_it_works && (
-          <div className="mb-3 rounded bg-neutral-50 p-2">
+          <div className="mb-3 rounded bg-neutral-50 p-3">
             <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
               Warum es funktioniert
             </p>
-            <p className="mt-1 text-xs text-neutral-700">{post.why_it_works}</p>
+            <p className="mt-2 text-xs leading-relaxed text-neutral-700">{post.why_it_works}</p>
+          </div>
+        )}
+
+        {/* Caption */}
+        {post.caption && (
+          <div className="mb-3">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-2">
+              Caption
+            </p>
+            <p className="whitespace-pre-line text-xs leading-relaxed text-neutral-600">
+              {post.caption}
+            </p>
           </div>
         )}
 
         {/* Hashtags at bottom */}
         {hashtags.length > 0 && (
-          <div className="mt-auto flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             {hashtags.map((tag) => (
               <span
                 key={tag}
