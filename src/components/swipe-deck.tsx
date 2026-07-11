@@ -118,7 +118,7 @@ function Card({
       )}
 
       {/* Left: Media */}
-      <div className="relative w-1/2 min-w-0 bg-black">
+      <div className="relative flex-1 min-w-0 bg-black">
         {post.thumbnail_url || post.media_url ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -146,8 +146,30 @@ function Card({
         )}
       </div>
 
+      {/* Middle: Stats */}
+      <div className="flex flex-col items-center justify-center gap-4 bg-neutral-900 px-4 py-6">
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-2xl">❤️</span>
+          <span className="text-sm font-semibold text-white">{formatCount(post.like_count)}</span>
+        </div>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-2xl">💬</span>
+          <span className="text-sm font-semibold text-white">{formatCount(post.comment_count)}</span>
+        </div>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-2xl">↗️</span>
+          <span className="text-sm font-semibold text-white">{formatCount(post.view_count)}</span>
+        </div>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-2xl">✨</span>
+          <span className="text-xs font-semibold text-neutral-400">
+            {formatCount((post.like_count ?? 0) + (post.comment_count ?? 0))}
+          </span>
+        </div>
+      </div>
+
       {/* Right: Info (scrollable) */}
-      <div className="flex w-1/2 min-w-0 flex-col overflow-y-auto p-4">
+      <div className="flex flex-1 min-w-0 flex-col overflow-y-auto p-4">
         {/* Hook */}
         <p className="mb-3 font-serif text-sm italic leading-snug text-neutral-900">
           "{post.hook ?? "Kein Hook erkannt"}"
@@ -167,26 +189,11 @@ function Card({
           </div>
         )}
 
-        {/* Stats */}
-        <div className="mb-3 grid grid-cols-2 gap-2 text-xs">
-          <div>
-            <p className="font-semibold uppercase tracking-wider text-neutral-500">Typ</p>
-            <p className="mt-0.5 text-neutral-800">{formatMediaType(post.media_type)}</p>
-          </div>
-          <div>
-            <p className="font-semibold uppercase tracking-wider text-neutral-500">Reichweite</p>
-            <p className="mt-0.5 text-neutral-800">{formatCount(post.view_count)}</p>
-          </div>
-          <div>
-            <p className="font-semibold uppercase tracking-wider text-neutral-500">Alter</p>
-            <p className="mt-0.5 text-neutral-800">{formatAge(post.posted_at)}</p>
-          </div>
-          <div>
-            <p className="font-semibold uppercase tracking-wider text-neutral-500">Interakt.</p>
-            <p className="mt-0.5 text-neutral-800">
-              {formatCount((post.like_count ?? 0) + (post.comment_count ?? 0))}
-            </p>
-          </div>
+        {/* Meta Info */}
+        <div className="mb-3 flex gap-2 text-[10px] text-neutral-500">
+          <span>{formatMediaType(post.media_type)}</span>
+          <span>•</span>
+          <span>{formatAge(post.posted_at)}</span>
         </div>
 
         {/* Why it works */}
