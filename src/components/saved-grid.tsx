@@ -121,11 +121,22 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
         <div className="space-y-6">
           {filteredPosts.map((post) => {
             const recipe = parseRecipeFromCaption(post.caption);
+            const isSelected = selectedRecipes.has(post.id);
             return (
               <div
                 key={post.id}
-                className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm"
+                className="relative overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm"
               >
+                {/* Checkbox */}
+                <div className="absolute top-3 right-3 z-10">
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => toggleRecipe(post.id)}
+                    className="h-5 w-5 cursor-pointer rounded border-neutral-300"
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   {/* Image */}
                   <div className="md:col-span-1">
