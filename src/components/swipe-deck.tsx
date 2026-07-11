@@ -5,7 +5,7 @@ import { motion, useAnimation, type PanInfo } from "framer-motion";
 import type { MediaType, PostWithAccount, SwipeDecision } from "@/lib/types";
 
 const SWIPE_THRESHOLD = 120;
-const CARD_HEIGHT = 600;
+const CARD_HEIGHT = 500;
 
 function formatCount(n: number | null) {
   if (n === null) return "–";
