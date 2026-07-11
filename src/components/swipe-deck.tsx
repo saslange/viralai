@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, useAnimation, type PanInfo } from "framer-motion";
 import type { PostWithAccount, SwipeDecision } from "@/lib/types";
+import { PostLightbox } from "@/components/post-lightbox";
 
 const SWIPE_THRESHOLD = 120;
 
@@ -22,10 +23,12 @@ function decisionLabel(decision: SwipeDecision) {
 function Card({
   post,
   onSwiped,
+  onExpand,
   isTop,
 }: {
   post: PostWithAccount;
   onSwiped: (decision: SwipeDecision) => void;
+  onExpand: () => void;
   isTop: boolean;
 }) {
   const controls = useAnimation();
@@ -88,7 +91,15 @@ function Card({
         </div>
       )}
 
-      <div className="relative aspect-[4/5] w-full bg-neutral-800">
+      <button
+        type="button"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          onExpand();
+        }}
+        className="group relative block h-full w-full bg-neutral-800"
+      >
         {post.thumbnail_url || post.media_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -102,28 +113,46 @@ function Card({
             Kein Bild
           </div>
         )}
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-4">
+
+        {post.media_type === "video" && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/50 backdrop-blur transition group-hover:scale-110">
+              <div className="ml-1 h-0 w-0 border-y-[10px] border-l-[16px] border-y-transparent border-l-white" />
+            </div>
+          </div>
+        )}
+
+        {/* Instagram-Reels-Style Stats, rechts am Bildrand */}
+        <div className="pointer-events-none absolute bottom-24 right-3 flex flex-col items-center gap-3 text-white drop-shadow">
+          <div className="flex flex-col items-center gap-0.5">
+            <span className="text-xl">❤️</span>
+            <span className="text-xs font-medium">{formatCount(post.like_count)}</span>
+          </div>
+          <div className="flex flex-col items-center gap-0.5">
+            <span className="text-xl">💬</span>
+            <span className="text-xs font-medium">{formatCount(post.comment_count)}</span>
+          </div>
+          <div className="flex flex-col items-center gap-0.5">
+            <span className="text-xl">👁</span>
+            <span className="text-xs font-medium">{formatCount(post.view_count)}</span>
+          </div>
+        </div>
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-4 pr-16 text-left">
           <p className="text-xs font-medium text-neutral-300">@{post.tracked_accounts.username}</p>
-          <p className="mt-1 line-clamp-2 text-sm font-semibold text-neutral-50">
+          <p className="mt-1 line-clamp-3 text-sm font-semibold text-neutral-50">
             {post.hook ?? "Kein Hook erkannt"}
           </p>
+          <p className="mt-1 text-[11px] text-neutral-400">Antippen zum Ansehen</p>
         </div>
-      </div>
-
-      <div className="flex flex-1 flex-col justify-between p-4">
-        <p className="line-clamp-4 text-sm text-neutral-300">{post.caption}</p>
-        <div className="mt-3 flex gap-4 text-xs text-neutral-400">
-          <span>❤️ {formatCount(post.like_count)}</span>
-          <span>💬 {formatCount(post.comment_count)}</span>
-          <span>👁 {formatCount(post.view_count)}</span>
-        </div>
-      </div>
+      </button>
     </motion.div>
   );
 }
 
 export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] }) {
   const [posts, setPosts] = useState(initialPosts);
+  const [expandedPost, setExpandedPost] = useState<PostWithAccount | null>(null);
 
   const recordSwipe = useCallback(async (postId: string, decision: SwipeDecision) => {
     await fetch("/api/swipe", {
@@ -152,6 +181,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if (expandedPost) return;
       if (!topPost) return;
       if (e.key === "ArrowRight") handleButton("keep");
       if (e.key === "ArrowLeft") handleButton("leave");
@@ -159,7 +189,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [topPost, handleButton]);
+  }, [topPost, handleButton, expandedPost]);
 
   const visiblePosts = useMemo(() => posts.slice(0, 3), [posts]);
 
@@ -191,6 +221,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
                 post={post}
                 isTop={i === 0}
                 onSwiped={(decision) => handleSwiped(post.id, decision)}
+                onExpand={() => setExpandedPost(post)}
               />
             </div>
           ))
@@ -218,8 +249,12 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
         </button>
       </div>
       <p className="text-xs text-neutral-600">
-        Ziehen oder Pfeiltasten: ← Leave · → Keep · ↑ Save
+        Ziehen oder Pfeiltasten: ← Leave · → Keep · ↑ Save · Bild antippen für Details
       </p>
+
+      {expandedPost && (
+        <PostLightbox post={expandedPost} onClose={() => setExpandedPost(null)} />
+      )}
     </div>
   );
 }
