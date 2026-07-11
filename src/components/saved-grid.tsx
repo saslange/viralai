@@ -198,20 +198,20 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
                   <img
                     src={post.thumbnail_url}
                     alt={post.hook ?? ""}
-                    className="h-full w-full object-cover transition group-hover:scale-105"
+                    className="h-full w-full object-cover object-center transition group-hover:scale-105"
                   />
                 )}
               </div>
-              <div className="flex flex-1 flex-col p-1">
-                <p className="truncate text-[9px] font-semibold text-neutral-900">
-                  @{post.tracked_accounts.username}
-                </p>
-                <p className="line-clamp-1 text-[9px] text-neutral-600">{post.hook}</p>
+              <div className="flex flex-1 flex-col p-1.5">
                 {post.label && (
-                  <p className="mt-0.5 inline-block truncate rounded bg-neutral-100 px-1 py-0.5 text-[7px] font-semibold text-neutral-600">
+                  <p className="mb-0.5 inline-block rounded bg-neutral-900 px-1.5 py-0.5 text-[8px] font-bold text-white">
                     {post.label}
                   </p>
                 )}
+                <p className="truncate text-[8px] font-semibold text-neutral-900">
+                  @{post.tracked_accounts.username}
+                </p>
+                <p className="line-clamp-1 text-[8px] text-neutral-600">{post.hook}</p>
                 <p className="mt-auto text-[7px] text-neutral-400">
                   ❤️ {formatCount(post.like_count)} · 💬 {formatCount(post.comment_count)}
                 </p>
