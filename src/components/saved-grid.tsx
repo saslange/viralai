@@ -11,10 +11,11 @@ function formatCount(n: number | null) {
   return String(n);
 }
 
-function parseRecipeFromCaption(caption: string | null): { title: string; ingredients: string[]; instructions: string[] } | null {
-  if (!caption) return null;
+function parseRecipeFromCaption(caption: string | null, hook: string | null): { title: string; ingredients: string[]; instructions: string[] } | null {
+  if (!caption && !hook) return null;
 
-  const lines = caption.split('\n').map(l => l.trim()).filter(Boolean);
+  const fullText = (caption || '') + '\n' + (hook || '');
+  const lines = fullText.split('\n').map(l => l.trim()).filter(Boolean);
 
   let title = '';
   let ingredients: string[] = [];
@@ -24,25 +25,35 @@ function parseRecipeFromCaption(caption: string | null): { title: string; ingred
   for (const line of lines) {
     const lower = line.toLowerCase();
 
-    if (lower.includes('zutat') || lower.includes('ingredient') || lower.includes('zutaten')) {
+    // Section headers
+    if (lower.includes('zutat') || lower.includes('ingredient') || lower.includes('zutaten') || lower.includes('ingredients')) {
       section = 'ingredients';
       continue;
     }
-    if (lower.includes('anleitung') || lower.includes('zubereitung') || lower.includes('instruction') || lower.includes('schritt')) {
+    if (lower.includes('anleitung') || lower.includes('zubereitung') || lower.includes('instruction') || lower.includes('schritt') || lower.includes('instructions') || lower.includes('steps')) {
       section = 'instructions';
       continue;
     }
-    if (lower.includes('nährwert') || lower.includes('kcal') || lower.includes('kalorien')) {
+    if (lower.includes('nährwert') || lower.includes('kcal') || lower.includes('kalorien') || lower.includes('nutrition')) {
       section = 'nutrition';
       continue;
     }
 
-    if (section === 'title' && !title && line.length < 100) {
+    // Parse based on section
+    if (section === 'title' && !title && line.length < 100 && !line.includes(':')) {
       title = line;
-    } else if (section === 'ingredients' && (line.startsWith('-') || line.startsWith('•') || /^\d+\./.test(line) || /^[a-z]/.test(line[0]))) {
-      ingredients.push(line.replace(/^[-•\d.]\s*/, ''));
-    } else if (section === 'instructions' && (line.startsWith('-') || line.startsWith('•') || /^\d+\./.test(line) || /^[a-z]/.test(line[0]))) {
-      instructions.push(line.replace(/^[-•\d.]\s*/, ''));
+    } else if (section === 'ingredients' && line.length > 0) {
+      // Remove bullets and numbers
+      const cleaned = line.replace(/^[-•*]\s*/, '').replace(/^\d+\.\s*/, '').trim();
+      if (cleaned && !cleaned.includes('zutaten') && !cleaned.includes('ingredient')) {
+        ingredients.push(cleaned);
+      }
+    } else if (section === 'instructions' && line.length > 0) {
+      // Remove bullets and numbers
+      const cleaned = line.replace(/^[-•*]\s*/, '').replace(/^\d+\.\s*/, '').trim();
+      if (cleaned && !cleaned.includes('anleitung') && !cleaned.includes('schritt') && !cleaned.includes('instruction')) {
+        instructions.push(cleaned);
+      }
     }
   }
 
@@ -120,7 +131,7 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
       {isRecipeView && filteredPosts.length > 0 ? (
         <div className="space-y-6">
           {filteredPosts.map((post) => {
-            const recipe = parseRecipeFromCaption(post.caption);
+            const recipe = parseRecipeFromCaption(post.caption, post.hook);
             const isSelected = selectedRecipes.has(post.id);
             return (
               <div

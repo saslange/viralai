@@ -3,14 +3,15 @@
 import { useState } from "react";
 import type { PostWithAccount } from "@/lib/types";
 
-function parseRecipeFromCaption(caption: string | null): {
+function parseRecipeFromCaption(caption: string | null, hook: string | null): {
   title: string;
   ingredients: string[];
   instructions: string[];
 } | null {
-  if (!caption) return null;
+  if (!caption && !hook) return null;
 
-  const lines = caption.split("\n").map((l) => l.trim()).filter(Boolean);
+  const fullText = (caption || "") + "\n" + (hook || "");
+  const lines = fullText.split("\n").map((l) => l.trim()).filter(Boolean);
 
   let title = "";
   let ingredients: string[] = [];
@@ -20,7 +21,7 @@ function parseRecipeFromCaption(caption: string | null): {
   for (const line of lines) {
     const lower = line.toLowerCase();
 
-    if (lower.includes("zutat") || lower.includes("ingredient") || lower.includes("zutaten")) {
+    if (lower.includes("zutat") || lower.includes("ingredient") || lower.includes("zutaten") || lower.includes("ingredients")) {
       section = "ingredients";
       continue;
     }
@@ -28,28 +29,30 @@ function parseRecipeFromCaption(caption: string | null): {
       lower.includes("anleitung") ||
       lower.includes("zubereitung") ||
       lower.includes("instruction") ||
-      lower.includes("schritt")
+      lower.includes("schritt") ||
+      lower.includes("instructions") ||
+      lower.includes("steps")
     ) {
       section = "instructions";
       continue;
     }
-    if (lower.includes("nährwert") || lower.includes("kcal") || lower.includes("kalorien")) {
+    if (lower.includes("nährwert") || lower.includes("kcal") || lower.includes("kalorien") || lower.includes("nutrition")) {
       section = "nutrition";
       continue;
     }
 
-    if (section === "title" && !title && line.length < 100) {
+    if (section === "title" && !title && line.length < 100 && !line.includes(":")) {
       title = line;
-    } else if (
-      section === "ingredients" &&
-      (line.startsWith("-") || line.startsWith("•") || /^\d+\./.test(line) || /^[a-z]/.test(line[0]))
-    ) {
-      ingredients.push(line.replace(/^[-•\d.]\s*/, ""));
-    } else if (
-      section === "instructions" &&
-      (line.startsWith("-") || line.startsWith("•") || /^\d+\./.test(line) || /^[a-z]/.test(line[0]))
-    ) {
-      instructions.push(line.replace(/^[-•\d.]\s*/, ""));
+    } else if (section === "ingredients" && line.length > 0) {
+      const cleaned = line.replace(/^[-•*]\s*/, "").replace(/^\d+\.\s*/, "").trim();
+      if (cleaned && !cleaned.includes("zutaten") && !cleaned.includes("ingredient")) {
+        ingredients.push(cleaned);
+      }
+    } else if (section === "instructions" && line.length > 0) {
+      const cleaned = line.replace(/^[-•*]\s*/, "").replace(/^\d+\.\s*/, "").trim();
+      if (cleaned && !cleaned.includes("anleitung") && !cleaned.includes("schritt") && !cleaned.includes("instruction")) {
+        instructions.push(cleaned);
+      }
     }
   }
 
@@ -107,7 +110,7 @@ export function RecipeExport({
       `;
 
       for (const post of selectedPosts) {
-        const recipe = parseRecipeFromCaption(post.caption);
+        const recipe = parseRecipeFromCaption(post.caption, post.hook);
         const image = post.thumbnail_url || "";
         const title = recipe?.title || post.hook || "Rezept";
 
