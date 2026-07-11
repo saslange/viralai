@@ -7,6 +7,13 @@ function engagementScore(post: PostWithAccount) {
   return (post.like_count ?? 0) + (post.comment_count ?? 0);
 }
 
+function formatCount(n: number | null) {
+  if (n === null) return "–";
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return String(n);
+}
+
 export default async function AnalyticsPage() {
   const supabase = await createClient();
 
@@ -117,26 +124,56 @@ export default async function AnalyticsPage() {
             Postings analysieren&quot;{uncategorizedCount > 0 ? ` (${uncategorizedCount} bereit)` : ""}.
           </p>
         ) : (
-          <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white shadow-sm">
-            {categoryRows.map((row) => (
-              <li key={row.category} className="flex items-center justify-between px-4 py-3">
-                <span className="text-sm capitalize text-neutral-800">
-                  {row.category.replace("-", " ")}
-                </span>
-                <div className="flex items-center gap-3">
-                  <div className="h-1.5 w-32 overflow-hidden rounded-full bg-neutral-100">
-                    <div
-                      className="h-full rounded-full bg-neutral-900"
-                      style={{ width: `${row.resonanceRate}%` }}
-                    />
+          <div className="space-y-6">
+            {categoryRows.map((row) => {
+              const categoryPosts = allPosts.filter(
+                (p) => p.hook_category === row.category && (decisionByPostId.get(p.id) === "keep" || decisionByPostId.get(p.id) === "save")
+              ).sort((a, b) => engagementScore(b) - engagementScore(a)).slice(0, 2);
+
+              return (
+                <div key={row.category}>
+                  <div className="mb-3 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-semibold capitalize text-neutral-900">
+                        {row.category.replace("-", " ")}
+                      </h3>
+                      <div className="mt-1 flex items-center gap-3">
+                        <div className="h-1.5 w-32 overflow-hidden rounded-full bg-neutral-100">
+                          <div
+                            className="h-full rounded-full bg-neutral-900"
+                            style={{ width: `${row.resonanceRate}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-neutral-500">
+                          {row.resonanceRate}% · n={row.total}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <span className="w-20 text-right text-xs text-neutral-500">
-                    {row.resonanceRate}% · n={row.total}
-                  </span>
+
+                  {categoryPosts.length > 0 && (
+                    <ul className="space-y-2">
+                      {categoryPosts.map((post) => (
+                        <li key={post.id} className="rounded-lg border border-neutral-200 bg-white p-3">
+                          <p className="font-serif text-sm italic text-neutral-900">
+                            „{post.hook}"
+                          </p>
+                          <div className="mt-2 flex items-center justify-between">
+                            <p className="text-xs text-neutral-500">
+                              @{post.tracked_accounts.username}
+                            </p>
+                            <span className="text-xs font-medium text-neutral-700">
+                              ❤️ {formatCount(post.like_count)} · 💬 {formatCount(post.comment_count)}
+                            </span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-              </li>
-            ))}
-          </ul>
+              );
+            })}
+          </div>
         )}
       </section>
 
