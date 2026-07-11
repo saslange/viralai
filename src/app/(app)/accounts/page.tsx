@@ -12,8 +12,8 @@ export default async function AccountsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-semibold">Beobachtete Accounts</h1>
-        <p className="text-sm text-neutral-400">
+        <h1 className="text-lg font-semibold text-neutral-900">Beobachtete Accounts</h1>
+        <p className="text-sm text-neutral-500">
           Instagram-Accounts hinzufügen, deren Postings analysiert werden sollen.
         </p>
       </div>

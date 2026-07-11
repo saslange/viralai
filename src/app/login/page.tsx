@@ -62,10 +62,12 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-950 px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-neutral-800 bg-neutral-900 p-8">
-        <h1 className="text-xl font-semibold text-neutral-50">heysash85 · viral lab</h1>
-        <p className="mt-1 text-sm text-neutral-400">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-orange-50 via-white to-fuchsia-50 px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-8 shadow-xl shadow-neutral-200/60">
+        <h1 className="bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 bg-clip-text text-xl font-bold text-transparent">
+          heysash85 · viral lab
+        </h1>
+        <p className="mt-1 text-sm text-neutral-500">
           Zugang nur für sash@heysash.de.
         </p>
 
@@ -77,19 +79,19 @@ function LoginForm() {
               placeholder="sash@heysash.de"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-neutral-400"
+              className="w-full rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 outline-none focus:border-fuchsia-400 focus:bg-white focus:ring-2 focus:ring-fuchsia-100"
             />
             <button
               type="submit"
               disabled={status === "busy"}
-              className="w-full rounded-lg bg-neutral-50 px-3 py-2 text-sm font-medium text-neutral-900 transition hover:bg-neutral-200 disabled:opacity-50"
+              className="w-full rounded-lg bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 px-3 py-2.5 text-sm font-semibold text-white shadow-md shadow-pink-500/25 transition hover:scale-[1.02] hover:shadow-lg hover:shadow-pink-500/30 active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
             >
               {status === "busy" ? "Sende Code…" : "Login-Code senden"}
             </button>
           </form>
         ) : (
           <form onSubmit={handleVerify} className="mt-6 space-y-3">
-            <p className="text-sm text-emerald-400">
+            <p className="text-sm text-emerald-600">
               Code an {email} verschickt — check dein Postfach (auch auf einem
               anderen Gerät möglich).
             </p>
@@ -101,12 +103,12 @@ function LoginForm() {
               placeholder="6-stelliger Code"
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-center text-lg tracking-[0.3em] text-neutral-100 outline-none focus:border-neutral-400"
+              className="w-full rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-center text-lg tracking-[0.3em] text-neutral-900 outline-none focus:border-fuchsia-400 focus:bg-white focus:ring-2 focus:ring-fuchsia-100"
             />
             <button
               type="submit"
               disabled={status === "busy"}
-              className="w-full rounded-lg bg-neutral-50 px-3 py-2 text-sm font-medium text-neutral-900 transition hover:bg-neutral-200 disabled:opacity-50"
+              className="w-full rounded-lg bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 px-3 py-2.5 text-sm font-semibold text-white shadow-md shadow-pink-500/25 transition hover:scale-[1.02] hover:shadow-lg hover:shadow-pink-500/30 active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
             >
               {status === "busy" ? "Prüfe…" : "Einloggen"}
             </button>
@@ -117,16 +119,16 @@ function LoginForm() {
                 setStatus("idle");
                 setError(null);
               }}
-              className="w-full text-center text-xs text-neutral-500 hover:text-neutral-300"
+              className="w-full text-center text-xs text-neutral-400 hover:text-neutral-700"
             >
               Andere Email verwenden
             </button>
           </form>
         )}
 
-        {status === "error" && <p className="mt-4 text-sm text-red-400">{error}</p>}
+        {status === "error" && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
-        <p className="mt-4 text-xs text-neutral-600">
+        <p className="mt-4 text-xs text-neutral-400">
           Tipp: In der Mail steht auch ein klickbarer Link — der funktioniert
           aber nur auf dem Gerät, auf dem du ihn angefordert hast. Der Code
           oben geht auf jedem Gerät.

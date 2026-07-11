@@ -33,7 +33,7 @@ export function AnalyzeButton() {
       <button
         onClick={handleClick}
         disabled={loading}
-        className="rounded-lg bg-neutral-50 px-3 py-1.5 text-xs font-medium text-neutral-900 hover:bg-neutral-200 disabled:opacity-50"
+        className="rounded-full bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-pink-500/25 transition hover:scale-105 hover:shadow-md hover:shadow-pink-500/30 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
       >
         {loading ? "Analysiere…" : "Neue Hooks analysieren"}
       </button>

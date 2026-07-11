@@ -74,29 +74,32 @@ export default async function AnalyticsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-lg font-semibold">Trends</h1>
-        <p className="text-sm text-neutral-400">
+        <h1 className="text-lg font-semibold text-neutral-900">Trends</h1>
+        <p className="text-sm text-neutral-500">
           Was bei dir und deinem Publikum funktioniert, basierend auf deinen Swipes.
         </p>
       </div>
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: "Behalten", value: counts.keep, color: "text-emerald-400" },
-          { label: "Gemerkt", value: counts.save, color: "text-amber-400" },
-          { label: "Verworfen", value: counts.leave, color: "text-red-400" },
-          { label: "Offen", value: counts.unswiped, color: "text-neutral-400" },
+          { label: "Behalten", value: counts.keep, color: "text-emerald-500" },
+          { label: "Gemerkt", value: counts.save, color: "text-amber-500" },
+          { label: "Verworfen", value: counts.leave, color: "text-rose-500" },
+          { label: "Offen", value: counts.unswiped, color: "text-neutral-500" },
         ].map((item) => (
-          <div key={item.label} className="rounded-xl border border-neutral-800 bg-neutral-900 p-4">
+          <div
+            key={item.label}
+            className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm"
+          >
             <p className="text-xs text-neutral-500">{item.label}</p>
-            <p className={`mt-1 text-2xl font-semibold ${item.color}`}>{item.value}</p>
+            <p className={`mt-1 text-2xl font-bold ${item.color}`}>{item.value}</p>
           </div>
         ))}
       </section>
 
       <section>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-neutral-200">Hook-Muster, die ankommen</h2>
+          <h2 className="text-sm font-semibold text-neutral-900">Hook-Muster, die ankommen</h2>
           <AnalyzeButton />
         </div>
         {categoryRows.length === 0 ? (
@@ -105,16 +108,16 @@ export default async function AnalyticsPage() {
             Hooks analysieren&quot;{uncategorizedCount > 0 ? ` (${uncategorizedCount} bereit)` : ""}.
           </p>
         ) : (
-          <ul className="divide-y divide-neutral-800 rounded-lg border border-neutral-800">
+          <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white shadow-sm">
             {categoryRows.map((row) => (
               <li key={row.category} className="flex items-center justify-between px-4 py-3">
-                <span className="text-sm capitalize text-neutral-200">
+                <span className="text-sm capitalize text-neutral-800">
                   {row.category.replace("-", " ")}
                 </span>
                 <div className="flex items-center gap-3">
-                  <div className="h-1.5 w-32 overflow-hidden rounded-full bg-neutral-800">
+                  <div className="h-1.5 w-32 overflow-hidden rounded-full bg-neutral-100">
                     <div
-                      className="h-full bg-emerald-400"
+                      className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400"
                       style={{ width: `${row.resonanceRate}%` }}
                     />
                   </div>
@@ -129,14 +132,14 @@ export default async function AnalyticsPage() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold text-neutral-200">Stärkste Accounts</h2>
+        <h2 className="mb-3 text-sm font-semibold text-neutral-900">Stärkste Accounts</h2>
         {topAccounts.length === 0 ? (
           <p className="text-sm text-neutral-500">Noch keine behaltenen/gemerkten Postings.</p>
         ) : (
-          <ul className="divide-y divide-neutral-800 rounded-lg border border-neutral-800">
+          <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white shadow-sm">
             {topAccounts.map((account) => (
               <li key={account.username} className="flex items-center justify-between px-4 py-3">
-                <span className="text-sm text-neutral-200">@{account.username}</span>
+                <span className="text-sm font-medium text-fuchsia-600">@{account.username}</span>
                 <span className="text-xs text-neutral-500">
                   Ø {account.avgEngagement} Interaktionen · {account.count} Postings
                 </span>

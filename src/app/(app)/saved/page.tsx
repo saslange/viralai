@@ -34,8 +34,8 @@ export default async function SavedPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-lg font-semibold">Gemerkt</h1>
-        <p className="text-sm text-neutral-400">
+        <h1 className="text-lg font-semibold text-neutral-900">Gemerkt</h1>
+        <p className="text-sm text-neutral-500">
           Postings, die du für später als Inspiration gespeichert hast.
         </p>
       </div>
@@ -50,9 +50,9 @@ export default async function SavedPage() {
               href={post.permalink ?? "#"}
               target="_blank"
               rel="noreferrer"
-              className="group overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900"
+              className="group overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm transition hover:shadow-md"
             >
-              <div className="aspect-square w-full bg-neutral-800">
+              <div className="aspect-square w-full bg-neutral-100">
                 {post.thumbnail_url && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -63,9 +63,11 @@ export default async function SavedPage() {
                 )}
               </div>
               <div className="p-2">
-                <p className="text-xs text-neutral-500">@{post.tracked_accounts.username}</p>
-                <p className="line-clamp-2 text-xs text-neutral-300">{post.hook}</p>
-                <p className="mt-1 text-[10px] text-neutral-600">
+                <p className="text-xs font-medium text-fuchsia-600">
+                  @{post.tracked_accounts.username}
+                </p>
+                <p className="line-clamp-2 text-xs text-neutral-600">{post.hook}</p>
+                <p className="mt-1 text-[10px] text-neutral-400">
                   ❤️ {formatCount(post.like_count)} · 💬 {formatCount(post.comment_count)}
                 </p>
               </div>

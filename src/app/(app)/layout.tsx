@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/components/logout-button";
 
 const NAV_ITEMS = [
@@ -9,17 +12,32 @@ const NAV_ITEMS = [
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-10 border-b border-neutral-800 bg-neutral-950/90 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b border-neutral-200 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-          <span className="text-sm font-semibold tracking-tight">heysash85 · viral lab</span>
-          <nav className="flex items-center gap-4 text-sm text-neutral-400">
-            {NAV_ITEMS.map((item) => (
-              <Link key={item.href} href={item.href} className="hover:text-neutral-100">
-                {item.label}
-              </Link>
-            ))}
+          <span className="bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 bg-clip-text text-sm font-bold tracking-tight text-transparent">
+            heysash85 · viral lab
+          </span>
+          <nav className="flex items-center gap-1 text-sm">
+            {NAV_ITEMS.map((item) => {
+              const active = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`rounded-full px-3 py-1.5 font-medium transition ${
+                    active
+                      ? "bg-neutral-900 text-white"
+                      : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
             <LogoutButton />
           </nav>
         </div>

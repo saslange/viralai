@@ -29,23 +29,23 @@ export function PostLightbox({ post, onClose }: { post: PostWithAccount; onClose
       onClick={onClose}
     >
       <div
-        className="flex max-h-full w-full max-w-md flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900"
+        className="flex max-h-full w-full max-w-md flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-neutral-800 px-4 py-3">
+        <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3">
           <div>
-            <p className="text-sm font-semibold text-neutral-100">
+            <p className="text-sm font-semibold text-neutral-900">
               @{post.tracked_accounts.username}
             </p>
             {post.posted_at && (
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-neutral-400">
                 {new Date(post.posted_at).toLocaleDateString("de-DE")}
               </p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-1 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100"
+            className="rounded-full p-1.5 text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-900"
             aria-label="Schließen"
           >
             ✕
@@ -71,27 +71,33 @@ export function PostLightbox({ post, onClose }: { post: PostWithAccount; onClose
                 className="max-h-[60vh] w-full object-contain"
               />
             ) : (
-              <div className="flex h-64 items-center justify-center text-neutral-600">
+              <div className="flex h-64 items-center justify-center text-neutral-500">
                 Kein Medium verfügbar
               </div>
             )}
           </div>
 
           <div className="space-y-3 p-4">
-            <div className="flex gap-5 text-sm text-neutral-300">
-              <span>❤️ {formatCount(post.like_count)}</span>
-              <span>💬 {formatCount(post.comment_count)}</span>
-              <span>👁 {formatCount(post.view_count)}</span>
+            <div className="flex gap-4 text-sm font-medium">
+              <span className="flex items-center gap-1 text-rose-500">
+                ❤️ <span className="text-neutral-800">{formatCount(post.like_count)}</span>
+              </span>
+              <span className="flex items-center gap-1 text-sky-500">
+                💬 <span className="text-neutral-800">{formatCount(post.comment_count)}</span>
+              </span>
+              <span className="flex items-center gap-1 text-violet-500">
+                👁 <span className="text-neutral-800">{formatCount(post.view_count)}</span>
+              </span>
             </div>
             {post.caption && (
-              <p className="whitespace-pre-line text-sm text-neutral-300">{post.caption}</p>
+              <p className="whitespace-pre-line text-sm text-neutral-600">{post.caption}</p>
             )}
             {post.permalink && (
               <a
                 href={post.permalink}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-block text-sm font-medium text-neutral-100 underline underline-offset-2"
+                className="inline-block text-sm font-semibold text-fuchsia-600 underline underline-offset-2 hover:text-fuchsia-700"
               >
                 Auf Instagram ansehen ↗
               </a>
