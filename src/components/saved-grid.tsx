@@ -185,14 +185,14 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
         <p className="text-sm text-neutral-500">Keine Posts mit diesem Label.</p>
       ) : (
         /* Grid View */
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-[repeat(5,minmax(0,1fr))] gap-2">
           {filteredPosts.map((post) => (
             <a
               key={post.id}
               href={post.permalink ?? "#"}
               target="_blank"
               rel="noreferrer"
-              className="group flex flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm transition hover:shadow-md"
+              className="group flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm transition hover:shadow-md"
             >
               <div className="aspect-square w-full bg-neutral-100">
                 {post.thumbnail_url && (
@@ -204,17 +204,17 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
                   />
                 )}
               </div>
-              <div className="flex flex-1 flex-col p-2">
-                <p className="text-xs font-semibold text-neutral-900">
+              <div className="flex flex-1 flex-col p-1.5">
+                <p className="text-[10px] font-semibold text-neutral-900 truncate">
                   @{post.tracked_accounts.username}
                 </p>
-                <p className="line-clamp-2 text-xs text-neutral-600">{post.hook}</p>
+                <p className="line-clamp-1 text-[10px] text-neutral-600">{post.hook}</p>
                 {post.label && (
-                  <p className="mt-1 inline-block rounded bg-neutral-100 px-2 py-0.5 text-[10px] font-semibold text-neutral-600">
+                  <p className="mt-0.5 inline-block rounded bg-neutral-100 px-1.5 py-0.5 text-[8px] font-semibold text-neutral-600 truncate">
                     {post.label}
                   </p>
                 )}
-                <p className="mt-auto pt-1 text-[10px] text-neutral-400">
+                <p className="mt-auto pt-0.5 text-[8px] text-neutral-400">
                   ❤️ {formatCount(post.like_count)} · 💬 {formatCount(post.comment_count)}
                 </p>
               </div>
