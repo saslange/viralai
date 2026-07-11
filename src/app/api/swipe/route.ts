@@ -21,3 +21,15 @@ export async function POST(request: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const postId = searchParams.get("post_id");
+  if (!postId) return NextResponse.json({ error: "post_id fehlt" }, { status: 400 });
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("swipes").delete().eq("post_id", postId);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}

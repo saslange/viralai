@@ -19,30 +19,39 @@ export function AccountFilter({ accounts }: { accounts: TrackedAccount[] }) {
   if (accounts.length === 0) return null;
 
   return (
-    <div className="mb-4 flex flex-wrap gap-2">
-      <button
-        onClick={() => select(null)}
-        className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
-          !activeId
-            ? "bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 text-white shadow-md shadow-pink-500/25"
-            : "bg-white text-neutral-600 shadow-sm ring-1 ring-neutral-200 hover:bg-neutral-50"
-        }`}
-      >
-        Alle Accounts
-      </button>
-      {accounts.map((account) => (
+    <div className="mb-5">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+        ★ Fokus
+      </p>
+      <div className="flex flex-wrap gap-2">
         <button
-          key={account.id}
-          onClick={() => select(account.id)}
-          className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
-            activeId === account.id
-              ? "bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 text-white shadow-md shadow-pink-500/25"
-              : "bg-white text-neutral-600 shadow-sm ring-1 ring-neutral-200 hover:bg-neutral-50"
+          onClick={() => select(null)}
+          className={`rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition ${
+            !activeId
+              ? "bg-neutral-900 text-white shadow-md"
+              : "bg-white text-neutral-500 shadow-sm ring-1 ring-neutral-200 hover:bg-neutral-50"
           }`}
         >
-          @{account.username}
+          Alle
         </button>
-      ))}
+        {accounts.map((account) => {
+          const active = activeId === account.id;
+          return (
+            <button
+              key={account.id}
+              onClick={() => select(active ? null : account.id)}
+              className={`rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition ${
+                active
+                  ? "bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 text-white shadow-md shadow-pink-500/25"
+                  : "bg-white text-neutral-500 shadow-sm ring-1 ring-neutral-200 hover:bg-neutral-50"
+              }`}
+            >
+              @{account.username}
+              {active && <span className="ml-1.5 opacity-80">✕</span>}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

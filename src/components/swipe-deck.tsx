@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, useAnimation, type PanInfo } from "framer-motion";
-import type { PostWithAccount, SwipeDecision } from "@/lib/types";
+import type { MediaType, PostWithAccount, SwipeDecision } from "@/lib/types";
 import { PostLightbox } from "@/components/post-lightbox";
 
 const SWIPE_THRESHOLD = 120;
 const CARD_HEIGHT = 640;
-const IMAGE_HEIGHT = 320;
+const IMAGE_HEIGHT = 260;
 
 function formatCount(n: number | null) {
   if (n === null) return "–";
@@ -16,10 +16,40 @@ function formatCount(n: number | null) {
   return String(n);
 }
 
+function formatMediaType(type: MediaType) {
+  if (type === "video") return "Video";
+  if (type === "carousel") return "Album";
+  return "Foto";
+}
+
+function formatAge(posted_at: string | null) {
+  if (!posted_at) return "–";
+  const diffMs = Date.now() - new Date(posted_at).getTime();
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (days < 1) return "heute";
+  if (days === 1) return "vor 1 Tag";
+  if (days < 7) return `vor ${days} Tagen`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 5) return weeks === 1 ? "vor 1 Woche" : `vor ${weeks} Wochen`;
+  const months = Math.floor(days / 30);
+  return months === 1 ? "vor 1 Monat" : `vor ${months} Monaten`;
+}
+
 function decisionLabel(decision: SwipeDecision) {
   if (decision === "keep") return { text: "KEEP", color: "text-emerald-500 border-emerald-500" };
   if (decision === "leave") return { text: "LEAVE", color: "text-rose-500 border-rose-500" };
   return { text: "SAVE", color: "text-amber-500 border-amber-500" };
+}
+
+function StatCell({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+        {label}
+      </p>
+      <p className="mt-0.5 text-sm font-semibold text-neutral-800">{value}</p>
+    </div>
+  );
 }
 
 function Card({
@@ -126,21 +156,24 @@ function Card({
       </div>
 
       <div className="flex flex-1 flex-col gap-3 overflow-hidden p-4">
-        <div className="flex gap-4 text-sm font-medium">
-          <span className="flex items-center gap-1 text-rose-500">
-            ❤️ <span className="text-neutral-800">{formatCount(post.like_count)}</span>
-          </span>
-          <span className="flex items-center gap-1 text-sky-500">
-            💬 <span className="text-neutral-800">{formatCount(post.comment_count)}</span>
-          </span>
-          <span className="flex items-center gap-1 text-violet-500">
-            👁 <span className="text-neutral-800">{formatCount(post.view_count)}</span>
-          </span>
-        </div>
-        <p className="line-clamp-[9] whitespace-pre-line text-sm text-neutral-600">
-          {post.caption ?? post.hook ?? "Keine Caption erkannt"}
+        <p className="font-serif text-lg italic leading-snug text-neutral-900">
+          „{post.hook ?? post.caption ?? "Kein Hook erkannt"}“
         </p>
-        <p className="mt-auto text-[11px] text-neutral-400">Antippen für Video/Vollbild</p>
+
+        <div className="grid grid-cols-4 gap-2 rounded-lg bg-neutral-50 p-3">
+          <StatCell label="Typ" value={formatMediaType(post.media_type)} />
+          <StatCell label="Reichweite" value={formatCount(post.view_count)} />
+          <StatCell label="Alter" value={formatAge(post.posted_at)} />
+          <StatCell
+            label="Interakt."
+            value={formatCount((post.like_count ?? 0) + (post.comment_count ?? 0))}
+          />
+        </div>
+
+        <p className="line-clamp-3 whitespace-pre-line text-xs text-neutral-500">
+          {post.caption}
+        </p>
+        <p className="mt-auto text-[11px] font-medium text-fuchsia-600">▶ Antippen für Video/Vollbild</p>
       </div>
     </motion.div>
   );
@@ -149,6 +182,11 @@ function Card({
 export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] }) {
   const [posts, setPosts] = useState(initialPosts);
   const [expandedPost, setExpandedPost] = useState<PostWithAccount | null>(null);
+  const [lastAction, setLastAction] = useState<{
+    post: PostWithAccount;
+    decision: SwipeDecision;
+  } | null>(null);
+  const [undoing, setUndoing] = useState(false);
 
   const recordSwipe = useCallback(async (postId: string, decision: SwipeDecision) => {
     await fetch("/api/swipe", {
@@ -159,18 +197,28 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
   }, []);
 
   const handleSwiped = useCallback(
-    (postId: string, decision: SwipeDecision) => {
-      recordSwipe(postId, decision);
-      setPosts((prev) => prev.filter((p) => p.id !== postId));
+    (post: PostWithAccount, decision: SwipeDecision) => {
+      recordSwipe(post.id, decision);
+      setLastAction({ post, decision });
+      setPosts((prev) => prev.filter((p) => p.id !== post.id));
     },
     [recordSwipe]
   );
+
+  const handleUndo = useCallback(async () => {
+    if (!lastAction || undoing) return;
+    setUndoing(true);
+    await fetch(`/api/swipe?post_id=${lastAction.post.id}`, { method: "DELETE" });
+    setPosts((prev) => [lastAction.post, ...prev]);
+    setLastAction(null);
+    setUndoing(false);
+  }, [lastAction, undoing]);
 
   const topPost = posts[0];
 
   const handleButton = useCallback(
     (decision: SwipeDecision) => {
-      if (topPost) handleSwiped(topPost.id, decision);
+      if (topPost) handleSwiped(topPost, decision);
     },
     [topPost, handleSwiped]
   );
@@ -182,10 +230,11 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
       if (e.key === "ArrowRight") handleButton("keep");
       if (e.key === "ArrowLeft") handleButton("leave");
       if (e.key === "ArrowUp") handleButton("save");
+      if (e.key === "z" && (e.metaKey || e.ctrlKey)) handleUndo();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [topPost, handleButton, expandedPost]);
+  }, [topPost, handleButton, expandedPost, handleUndo]);
 
   const visiblePosts = useMemo(() => posts.slice(0, 3), [posts]);
 
@@ -199,6 +248,14 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
         <p className="mt-1 text-sm text-neutral-400">
           Neue Postings kommen mit dem nächsten Sync rein.
         </p>
+        {lastAction && (
+          <button
+            onClick={handleUndo}
+            className="mt-4 rounded-full bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-200"
+          >
+            ↺ Letzten Swipe rückgängig machen
+          </button>
+        )}
       </div>
     );
   }
@@ -219,7 +276,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
               <Card
                 post={post}
                 isTop={i === 0}
-                onSwiped={(decision) => handleSwiped(post.id, decision)}
+                onSwiped={(decision) => handleSwiped(post, decision)}
                 onExpand={() => setExpandedPost(post)}
               />
             </div>
@@ -227,28 +284,62 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
           .reverse()}
       </div>
 
-      <div className="flex gap-4">
-        <button
-          onClick={() => handleButton("leave")}
-          className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-rose-500 shadow-md shadow-rose-200/60 ring-1 ring-rose-200 transition hover:scale-105 hover:bg-rose-50 hover:shadow-lg hover:shadow-rose-200/70 active:scale-95"
-        >
-          ✕ Leave
-        </button>
-        <button
-          onClick={() => handleButton("save")}
-          className="rounded-full bg-gradient-to-r from-amber-400 to-orange-400 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-amber-300/50 transition hover:scale-105 hover:shadow-lg hover:shadow-amber-300/60 active:scale-95"
-        >
-          ↑ Save
-        </button>
-        <button
-          onClick={() => handleButton("keep")}
-          className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-300/50 transition hover:scale-105 hover:shadow-lg hover:shadow-emerald-300/60 active:scale-95"
-        >
-          ✓ Keep
-        </button>
+      <div className="flex items-end gap-5">
+        <div className="flex flex-col items-center gap-1.5">
+          <button
+            onClick={() => handleButton("leave")}
+            aria-label="Leave"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-xl text-rose-500 shadow-md shadow-rose-200/60 ring-1 ring-rose-200 transition hover:scale-110 hover:bg-rose-50 active:scale-95"
+          >
+            ✕
+          </button>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+            Leave
+          </span>
+        </div>
+
+        <div className="flex flex-col items-center gap-1.5">
+          <button
+            onClick={handleUndo}
+            disabled={!lastAction || undoing}
+            aria-label="Zurück"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-lg text-neutral-500 shadow-md shadow-neutral-200/60 ring-1 ring-neutral-200 transition hover:scale-110 hover:bg-neutral-50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100"
+          >
+            ↺
+          </button>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+            Zurück
+          </span>
+        </div>
+
+        <div className="flex flex-col items-center gap-1.5">
+          <button
+            onClick={() => handleButton("save")}
+            aria-label="Save"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-400 text-xl text-white shadow-md shadow-amber-300/50 transition hover:scale-110 active:scale-95"
+          >
+            ★
+          </button>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+            Save
+          </span>
+        </div>
+
+        <div className="flex flex-col items-center gap-1.5">
+          <button
+            onClick={() => handleButton("keep")}
+            aria-label="Keep"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-400 text-xl text-white shadow-md shadow-emerald-300/50 transition hover:scale-110 active:scale-95"
+          >
+            ✓
+          </button>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+            Keep
+          </span>
+        </div>
       </div>
       <p className="text-xs text-neutral-400">
-        Ziehen oder Pfeiltasten: ← Leave · → Keep · ↑ Save · Bild antippen für Details
+        Ziehen oder Pfeiltasten: ← Leave · → Keep · ↑ Save · ⌘Z Zurück · Bild antippen für Details
       </p>
 
       {expandedPost && (
