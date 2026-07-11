@@ -48,24 +48,30 @@ export default async function SwipePage({
 
   return (
     <div>
-      <div className="mb-4">
-        <h1 className="text-lg font-semibold text-neutral-900">Swipe</h1>
-        <p className="text-sm text-neutral-500">
-          Rechts = behalten, links = verwerfen, hoch = merken für später.
-        </p>
+      {/* Tabs */}
+      <div className="mb-6 border-b border-neutral-200">
+        <div className="flex gap-8">
+          <div className="border-b-2 border-neutral-900 pb-3">
+            <p className="text-sm font-semibold text-neutral-900">
+              Swipe <span className="text-neutral-500">{remainingCount ?? 0}</span>
+            </p>
+          </div>
+          <div className="pb-3">
+            <p className="text-sm font-medium text-neutral-400">
+              Behalten <span className="text-neutral-400">{keepCount}</span>
+            </p>
+          </div>
+          <div className="pb-3">
+            <p className="text-sm font-medium text-neutral-400">
+              Gemerkt <span className="text-neutral-400">{saveCount}</span>
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="mb-5 flex gap-4 text-sm">
-        <span className="font-medium text-neutral-700">
-          🔥 <span className="font-bold">{remainingCount ?? 0}</span> im Stapel
-        </span>
-        <span className="font-medium text-emerald-600">
-          ✓ <span className="font-bold">{keepCount}</span> behalten
-        </span>
-        <span className="font-medium text-amber-600">
-          ★ <span className="font-bold">{saveCount}</span> gemerkt
-        </span>
-      </div>
+      <p className="mb-5 text-xs text-neutral-500">
+        Rechts = behalten, links = verwerfen, hoch = merken für später.
+      </p>
 
       <AccountFilter accounts={(accounts as TrackedAccount[] | null) ?? []} />
       <SwipeDeck
