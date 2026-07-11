@@ -28,6 +28,7 @@ export type Post = {
   fetched_at: string;
   hook_category: string | null;
   why_it_works: string | null;
+  label: string | null;
 };
 
 export type SwipeDecision = "keep" | "leave" | "save";

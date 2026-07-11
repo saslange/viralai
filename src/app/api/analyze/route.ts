@@ -51,7 +51,7 @@ export async function POST() {
     for (const [id, result] of Object.entries(results)) {
       const { error: updateError } = await supabase
         .from("posts")
-        .update({ hook_category: result.category, why_it_works: result.why })
+        .update({ hook_category: result.category, why_it_works: result.why, label: result.label })
         .eq("id", id);
       if (!updateError) categorized += 1;
     }

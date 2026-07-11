@@ -33,6 +33,7 @@ export type PostAnalysisInput = {
 export type PostAnalysisResult = {
   category: HookCategory;
   why: string;
+  label: string;
 };
 
 /**
@@ -62,7 +63,7 @@ export async function analyzePosts(
 
   const tool: Anthropic.Tool = {
     name: "submit_analysis",
-    description: "Liefert für jeden Post eine Hook-Kategorie und eine kurze Begründung.",
+    description: "Liefert für jeden Post eine Hook-Kategorie, Begründung und Label.",
     input_schema: {
       type: "object",
       properties: {
@@ -78,8 +79,13 @@ export async function analyzePosts(
                 description:
                   "1-2 Sätze auf Deutsch: was an Hook/Content das Publikum catcht und warum es (basierend auf den Zahlen) gut oder schlecht ankommt.",
               },
+              label: {
+                type: "string",
+                enum: ["Rezept", "Fitness-Tipp", "Transformation", "Motivational", "Ernährung", "Training", "Tipps/Hacks", "Challenge", "Story/Personal", "Sonstiges"],
+                description: "Kategorie des Post-Inhalts für Filterung",
+              },
             },
-            required: ["id", "category", "why"],
+            required: ["id", "category", "why", "label"],
           },
         },
       },
@@ -100,6 +106,7 @@ export async function analyzePosts(
 Für JEDEN der folgenden Posts (id nicht verändern, für alle IDs einen Eintrag liefern):
 1. Ordne den Hook einer Kategorie zu: ${HOOK_CATEGORIES.join(", ")}.
 2. Schreib 1-2 Sätze auf Deutsch, was am Hook/Content das Publikum catcht (Neugier-Lücke, Kontroverse, Persönliches, praktischer Nutzen, Social Proof, Zahlen/Fakten, o.ä.) und ordne das an den Engagement-Zahlen relativ zu den anderen Posts ein.
+3. Kategorisiere den Post-Inhalt mit einem Label aus: Rezept, Fitness-Tipp, Transformation, Motivational, Ernährung, Training, Tipps/Hacks, Challenge, Story/Personal, Sonstiges.
 
 Posts:
 ${list}`,
@@ -110,7 +117,7 @@ ${list}`,
   const toolUse = message.content.find(
     (c): c is Anthropic.ToolUseBlock => c.type === "tool_use"
   );
-  const results = (toolUse?.input as { results?: Array<{ id: string; category: string; why: string }> })
+  const results = (toolUse?.input as { results?: Array<{ id: string; category: string; why: string; label: string }> })
     ?.results;
   if (!results) return {};
 
@@ -120,7 +127,7 @@ ${list}`,
     const category = HOOK_CATEGORIES.includes(r.category as HookCategory)
       ? (r.category as HookCategory)
       : "other";
-    byId[r.id] = { category, why: r.why ?? "" };
+    byId[r.id] = { category, why: r.why ?? "", label: r.label ?? "Sonstiges" };
   }
   return byId;
 }
