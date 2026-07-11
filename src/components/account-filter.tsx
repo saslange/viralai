@@ -42,7 +42,7 @@ export function AccountFilter({ accounts }: { accounts: TrackedAccount[] }) {
               onClick={() => select(active ? null : account.id)}
               className={`rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition ${
                 active
-                  ? "bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 text-white shadow-md shadow-pink-500/25"
+                  ? "bg-neutral-900 text-white shadow-md"
                   : "bg-white text-neutral-500 shadow-sm ring-1 ring-neutral-200 hover:bg-neutral-50"
               }`}
             >

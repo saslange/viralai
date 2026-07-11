@@ -18,7 +18,7 @@ export function AnalyzeButton() {
       if (!res.ok) {
         setResult(json?.error ?? `Fehler (Status ${res.status})`);
       } else {
-        setResult(`${json?.categorized ?? 0} Hooks kategorisiert`);
+        setResult(`${json?.categorized ?? 0} Postings analysiert`);
       }
       router.refresh();
     } catch {
@@ -33,9 +33,9 @@ export function AnalyzeButton() {
       <button
         onClick={handleClick}
         disabled={loading}
-        className="rounded-full bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm shadow-pink-500/25 transition hover:scale-105 hover:shadow-md hover:shadow-pink-500/30 active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+        className="rounded-full bg-neutral-900 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:scale-105 hover:bg-black active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
       >
-        {loading ? "Analysiere…" : "Neue Hooks analysieren"}
+        {loading ? "Analysiere…" : "Neue Postings analysieren"}
       </button>
       {result && <span className="text-xs text-neutral-500">{result}</span>}
     </div>

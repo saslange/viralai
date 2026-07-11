@@ -78,17 +78,25 @@ export function PostLightbox({ post, onClose }: { post: PostWithAccount; onClose
           </div>
 
           <div className="space-y-3 p-4">
-            <div className="flex gap-4 text-sm font-medium">
-              <span className="flex items-center gap-1 text-rose-500">
-                ❤️ <span className="text-neutral-800">{formatCount(post.like_count)}</span>
+            <div className="flex gap-4 text-sm font-medium text-neutral-800">
+              <span className="flex items-center gap-1">
+                ❤️ {formatCount(post.like_count)}
               </span>
-              <span className="flex items-center gap-1 text-sky-500">
-                💬 <span className="text-neutral-800">{formatCount(post.comment_count)}</span>
+              <span className="flex items-center gap-1">
+                💬 {formatCount(post.comment_count)}
               </span>
-              <span className="flex items-center gap-1 text-violet-500">
-                👁 <span className="text-neutral-800">{formatCount(post.view_count)}</span>
+              <span className="flex items-center gap-1">
+                👁 {formatCount(post.view_count)}
               </span>
             </div>
+            {post.why_it_works && (
+              <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+                  Warum es funktioniert
+                </p>
+                <p className="mt-1 text-sm text-neutral-700">{post.why_it_works}</p>
+              </div>
+            )}
             {post.caption && (
               <p className="whitespace-pre-line text-sm text-neutral-600">{post.caption}</p>
             )}
@@ -97,7 +105,7 @@ export function PostLightbox({ post, onClose }: { post: PostWithAccount; onClose
                 href={post.permalink}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-block text-sm font-semibold text-fuchsia-600 underline underline-offset-2 hover:text-fuchsia-700"
+                className="inline-block text-sm font-semibold text-neutral-900 underline underline-offset-2 hover:text-neutral-600"
               >
                 Auf Instagram ansehen ↗
               </a>

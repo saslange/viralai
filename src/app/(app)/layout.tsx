@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/components/logout-button";
+import { Logo } from "@/components/logo";
 
 const NAV_ITEMS = [
   { href: "/", label: "Swipe" },
@@ -16,11 +17,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-10 border-b border-neutral-200 bg-white/80 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b border-neutral-300 bg-[#f4f1ea]/90 backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
-          <span className="bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 bg-clip-text text-sm font-bold tracking-tight text-transparent">
-            heysash85 · viral lab
-          </span>
+          <Logo className="text-sm text-neutral-900" />
           <nav className="flex items-center gap-1 text-sm">
             {NAV_ITEMS.map((item) => {
               const active = pathname === item.href;
@@ -31,7 +30,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   className={`rounded-full px-3 py-1.5 font-medium transition ${
                     active
                       ? "bg-neutral-900 text-white"
-                      : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+                      : "text-neutral-500 hover:bg-neutral-200 hover:text-neutral-900"
                   }`}
                 >
                   {item.label}

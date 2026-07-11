@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { AnalyzeButton } from "@/components/analyze-button";
+import { ContentIdeas } from "@/components/content-ideas";
 import type { PostWithAccount, SwipeDecision } from "@/lib/types";
 
 function engagementScore(post: PostWithAccount) {
@@ -71,6 +72,14 @@ export default async function AnalyticsPage() {
     (p) => p.hook && !p.hook_category && decisionByPostId.get(p.id)
   ).length;
 
+  const insightExamples = allPosts
+    .filter((p) => {
+      const decision = decisionByPostId.get(p.id);
+      return (decision === "keep" || decision === "save") && p.why_it_works;
+    })
+    .sort((a, b) => (b.like_count ?? 0) - (a.like_count ?? 0))
+    .slice(0, 5);
+
   return (
     <div className="space-y-8">
       <div>
@@ -104,8 +113,8 @@ export default async function AnalyticsPage() {
         </div>
         {categoryRows.length === 0 ? (
           <p className="text-sm text-neutral-500">
-            Noch keine kategorisierten Hooks. Swipe ein paar Postings und klick auf &quot;Neue
-            Hooks analysieren&quot;{uncategorizedCount > 0 ? ` (${uncategorizedCount} bereit)` : ""}.
+            Noch keine analysierten Postings. Swipe ein paar Postings und klick auf &quot;Neue
+            Postings analysieren&quot;{uncategorizedCount > 0 ? ` (${uncategorizedCount} bereit)` : ""}.
           </p>
         ) : (
           <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white shadow-sm">
@@ -117,7 +126,7 @@ export default async function AnalyticsPage() {
                 <div className="flex items-center gap-3">
                   <div className="h-1.5 w-32 overflow-hidden rounded-full bg-neutral-100">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400"
+                      className="h-full rounded-full bg-neutral-900"
                       style={{ width: `${row.resonanceRate}%` }}
                     />
                   </div>
@@ -139,7 +148,7 @@ export default async function AnalyticsPage() {
           <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white shadow-sm">
             {topAccounts.map((account) => (
               <li key={account.username} className="flex items-center justify-between px-4 py-3">
-                <span className="text-sm font-medium text-fuchsia-600">@{account.username}</span>
+                <span className="text-sm font-medium text-neutral-900">@{account.username}</span>
                 <span className="text-xs text-neutral-500">
                   Ø {account.avgEngagement} Interaktionen · {account.count} Postings
                 </span>
@@ -148,6 +157,32 @@ export default async function AnalyticsPage() {
           </ul>
         )}
       </section>
+
+      {insightExamples.length > 0 && (
+        <section>
+          <h2 className="mb-3 text-sm font-semibold text-neutral-900">
+            Was catcht — Beispiele
+          </h2>
+          <ul className="space-y-3">
+            {insightExamples.map((post) => (
+              <li
+                key={post.id}
+                className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm"
+              >
+                <p className="text-xs font-medium text-neutral-500">
+                  @{post.tracked_accounts.username}
+                </p>
+                <p className="mt-1 font-serif text-sm italic text-neutral-900">
+                  „{post.hook}“
+                </p>
+                <p className="mt-2 text-xs text-neutral-600">{post.why_it_works}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <ContentIdeas />
     </div>
   );
 }

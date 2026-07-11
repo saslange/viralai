@@ -63,7 +63,7 @@ export default async function SavedPage() {
                 )}
               </div>
               <div className="p-2">
-                <p className="text-xs font-medium text-fuchsia-600">
+                <p className="text-xs font-semibold text-neutral-900">
                   @{post.tracked_accounts.username}
                 </p>
                 <p className="line-clamp-2 text-xs text-neutral-600">{post.hook}</p>

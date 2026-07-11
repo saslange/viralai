@@ -106,7 +106,7 @@ function Card({
 
   return (
     <motion.div
-      className="absolute inset-0 flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl shadow-neutral-200/70"
+      className="absolute inset-0 flex flex-col overflow-hidden rounded-2xl border border-neutral-300 bg-white shadow-xl shadow-neutral-300/50"
       style={{ touchAction: "none" }}
       drag={isTop}
       dragElastic={0.9}
@@ -150,7 +150,7 @@ function Card({
           </div>
         )}
 
-        <div className="pointer-events-none absolute left-3 top-3 rounded-full bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
+        <div className="pointer-events-none absolute left-3 top-3 rounded-full bg-neutral-900 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
           @{post.tracked_accounts.username}
         </div>
       </div>
@@ -170,10 +170,19 @@ function Card({
           />
         </div>
 
-        <p className="line-clamp-3 whitespace-pre-line text-xs text-neutral-500">
+        {post.why_it_works && (
+          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-2.5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+              Warum es funktioniert
+            </p>
+            <p className="mt-1 text-xs text-neutral-700">{post.why_it_works}</p>
+          </div>
+        )}
+
+        <p className="line-clamp-2 whitespace-pre-line text-xs text-neutral-500">
           {post.caption}
         </p>
-        <p className="mt-auto text-[11px] font-medium text-fuchsia-600">▶ Antippen für Video/Vollbild</p>
+        <p className="mt-auto text-[11px] font-semibold uppercase tracking-wide text-neutral-500">▶ Antippen für Video/Vollbild</p>
       </div>
     </motion.div>
   );
@@ -316,7 +325,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
           <button
             onClick={() => handleButton("save")}
             aria-label="Save"
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-400 text-xl text-white shadow-md shadow-amber-300/50 transition hover:scale-110 active:scale-95"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-500 text-xl text-white shadow-md shadow-amber-300/50 transition hover:scale-110 hover:bg-amber-600 active:scale-95"
           >
             ★
           </button>
@@ -329,7 +338,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
           <button
             onClick={() => handleButton("keep")}
             aria-label="Keep"
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-400 text-xl text-white shadow-md shadow-emerald-300/50 transition hover:scale-110 active:scale-95"
+            className="flex h-14 w-14 items-center justify-center rounded-full bg-neutral-900 text-xl text-white shadow-md shadow-neutral-400/40 transition hover:scale-110 hover:bg-black active:scale-95"
           >
             ✓
           </button>

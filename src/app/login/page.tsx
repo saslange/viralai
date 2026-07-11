@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Logo } from "@/components/logo";
 
 function LoginForm() {
   const router = useRouter();
@@ -62,12 +63,10 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-orange-50 via-white to-fuchsia-50 px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-neutral-200 bg-white p-8 shadow-xl shadow-neutral-200/60">
-        <h1 className="bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 bg-clip-text text-xl font-bold text-transparent">
-          heysash85 · viral lab
-        </h1>
-        <p className="mt-1 text-sm text-neutral-500">
+    <div className="flex min-h-screen items-center justify-center bg-[#f4f1ea] px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-neutral-300 bg-white p-8 shadow-xl shadow-neutral-300/40">
+        <Logo className="text-lg text-neutral-900" />
+        <p className="mt-2 text-sm text-neutral-500">
           Zugang nur für sash@heysash.de.
         </p>
 
@@ -79,12 +78,12 @@ function LoginForm() {
               placeholder="sash@heysash.de"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 outline-none focus:border-fuchsia-400 focus:bg-white focus:ring-2 focus:ring-fuchsia-100"
+              className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-900 focus:bg-white focus:ring-2 focus:ring-neutral-200"
             />
             <button
               type="submit"
               disabled={status === "busy"}
-              className="w-full rounded-lg bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 px-3 py-2.5 text-sm font-semibold text-white shadow-md shadow-pink-500/25 transition hover:scale-[1.02] hover:shadow-lg hover:shadow-pink-500/30 active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+              className="w-full rounded-lg bg-neutral-900 px-3 py-2.5 text-sm font-semibold text-white shadow-md shadow-neutral-400/30 transition hover:scale-[1.02] hover:bg-black active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
             >
               {status === "busy" ? "Sende Code…" : "Login-Code senden"}
             </button>
@@ -103,12 +102,12 @@ function LoginForm() {
               placeholder="6-stelliger Code"
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              className="w-full rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-center text-lg tracking-[0.3em] text-neutral-900 outline-none focus:border-fuchsia-400 focus:bg-white focus:ring-2 focus:ring-fuchsia-100"
+              className="w-full rounded-lg border border-neutral-300 bg-neutral-50 px-3 py-2 text-center text-lg tracking-[0.3em] text-neutral-900 outline-none focus:border-neutral-900 focus:bg-white focus:ring-2 focus:ring-neutral-200"
             />
             <button
               type="submit"
               disabled={status === "busy"}
-              className="w-full rounded-lg bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 px-3 py-2.5 text-sm font-semibold text-white shadow-md shadow-pink-500/25 transition hover:scale-[1.02] hover:shadow-lg hover:shadow-pink-500/30 active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+              className="w-full rounded-lg bg-neutral-900 px-3 py-2.5 text-sm font-semibold text-white shadow-md shadow-neutral-400/30 transition hover:scale-[1.02] hover:bg-black active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
             >
               {status === "busy" ? "Prüfe…" : "Einloggen"}
             </button>

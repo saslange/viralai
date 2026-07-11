@@ -47,12 +47,12 @@ export function AccountsManager({ initialAccounts }: { initialAccounts: TrackedA
           onChange={(e) => setUsername(e.target.value)}
           placeholder="z. B. heysash85 oder @username"
           required
-          className="flex-1 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 outline-none focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-100"
+          className="flex-1 rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-900 focus:ring-2 focus:ring-neutral-200"
         />
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-lg bg-gradient-to-r from-fuchsia-600 via-pink-500 to-orange-400 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-pink-500/25 transition hover:scale-[1.02] hover:shadow-lg hover:shadow-pink-500/30 active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+          className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-neutral-400/30 transition hover:scale-[1.02] hover:bg-black active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
         >
           Hinzufügen
         </button>
@@ -62,7 +62,7 @@ export function AccountsManager({ initialAccounts }: { initialAccounts: TrackedA
       {accounts.length === 0 ? (
         <p className="text-sm text-neutral-500">Noch keine Accounts hinzugefügt.</p>
       ) : (
-        <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white shadow-sm">
+        <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-300 bg-white shadow-sm">
           {accounts.map((account) => (
             <li key={account.id} className="flex items-center justify-between px-4 py-3">
               <div>
