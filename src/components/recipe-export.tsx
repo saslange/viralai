@@ -106,68 +106,6 @@ export function RecipeExport({
     try {
       const selectedPosts = recipes.filter((p) => selectedRecipes.has(p.id));
 
-      // Create a temporary container with all recipes
-      const tempContainer = document.createElement("div");
-      tempContainer.style.position = "absolute";
-      tempContainer.style.left = "-9999px";
-      tempContainer.style.width = "210mm";
-      tempContainer.style.background = "white";
-      tempContainer.style.padding = "20px";
-      tempContainer.style.fontFamily = "Arial, sans-serif";
-      tempContainer.style.color = "#333";
-
-      let content = '<h1 style="text-align: center; color: #16a34a; margin-bottom: 40px;">🍳 Mein Rezept Archiv</h1>';
-
-      for (const post of selectedPosts) {
-        const recipe = parseRecipeFromCaption(post.caption, post.hook);
-        const title = recipe?.title || post.hook || "Rezept";
-
-        content += `
-          <div style="page-break-after: always; margin-bottom: 40px; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-            <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-              ${post.thumbnail_url ? `<div style="flex-shrink: 0;"><img src="${post.thumbnail_url}" alt="${title}" style="max-width: 150px; max-height: 150px; border-radius: 4px; object-fit: cover;"></div>` : ""}
-              <div style="flex: 1;">
-                <h2 style="margin: 0 0 10px 0; font-size: 20px;">${title}</h2>
-                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
-                  <p style="margin: 0;">📸 @${post.tracked_accounts.username}</p>
-                  <p style="margin: 5px 0 0 0;">❤️ ${post.like_count?.toLocaleString() || "?"} Likes · 💬 ${post.comment_count?.toLocaleString() || "?"} Kommentare</p>
-                </div>
-                ${post.why_it_works ? `<div style="background: #f0f0f0; padding: 10px; border-radius: 4px; font-style: italic; margin: 10px 0; font-size: 12px;"><strong>Warum es gut ankommt:</strong><br>${post.why_it_works}</div>` : ""}
-              </div>
-            </div>
-
-            ${recipe?.ingredients && recipe.ingredients.length > 0 ? `
-              <h3 style="font-size: 16px; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #16a34a; padding-bottom: 5px;">🥘 Zutaten</h3>
-              <ul style="margin: 10px 0; padding-left: 20px;">
-                ${recipe.ingredients.map((ing) => `<li style="margin: 5px 0; font-size: 13px;">${ing}</li>`).join("")}
-              </ul>
-            ` : ""}
-
-            ${recipe?.instructions && recipe.instructions.length > 0 ? `
-              <h3 style="font-size: 16px; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #16a34a; padding-bottom: 5px;">📝 Anleitung</h3>
-              <ol style="margin: 10px 0; padding-left: 20px;">
-                ${recipe.instructions.map((instr) => `<li style="margin: 5px 0; font-size: 13px;">${instr}</li>`).join("")}
-              </ol>
-            ` : ""}
-
-            <div style="font-size: 11px; margin-top: 15px; word-break: break-all;">
-              <strong>Link:</strong> <a href="${post.permalink || "#"}" style="color: #16a34a; text-decoration: none;">${post.permalink || "N/A"}</a>
-            </div>
-          </div>
-        `;
-      }
-
-      tempContainer.innerHTML = content;
-      document.body.appendChild(tempContainer);
-
-      // Convert to canvas and then to PDF
-      const canvas = await html2canvas(tempContainer, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-      });
-
       // Create PDF
       const pdf = new jsPDF({
         orientation: "portrait",
@@ -175,29 +113,111 @@ export function RecipeExport({
         format: "a4",
       });
 
-      const imgData = canvas.toDataURL("image/png");
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const A4_HEIGHT = 297; // mm
+      const PAGE_WIDTH = 210; // mm
+      let yPosition = 20; // Start position on first page
+      let isFirstPage = true;
 
-      let heightLeft = imgHeight;
-      let position = 0;
+      // Add title
+      const titleContainer = document.createElement("div");
+      titleContainer.style.position = "absolute";
+      titleContainer.style.left = "-9999px";
+      titleContainer.style.width = "210mm";
+      titleContainer.innerHTML = '<h1 style="text-align: center; color: #16a34a; margin: 0; font-size: 24px;">🍳 Mein Rezept Archiv</h1>';
+      document.body.appendChild(titleContainer);
 
-      // Add image to PDF
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= 297; // A4 height in mm
+      const titleCanvas = await html2canvas(titleContainer, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+      });
 
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= 297;
+      const titleHeight = (titleCanvas.height * PAGE_WIDTH) / titleCanvas.width / 10; // Convert to mm
+      const titleImg = titleCanvas.toDataURL("image/png");
+      pdf.addImage(titleImg, "PNG", 0, 10, PAGE_WIDTH, titleHeight);
+      yPosition = 10 + titleHeight + 10;
+
+      document.body.removeChild(titleContainer);
+
+      // Process each recipe
+      for (const post of selectedPosts) {
+        const recipe = parseRecipeFromCaption(post.caption, post.hook);
+        const title = recipe?.title || post.hook || "Rezept";
+
+        // Create recipe container
+        const recipeContainer = document.createElement("div");
+        recipeContainer.style.position = "absolute";
+        recipeContainer.style.left = "-9999px";
+        recipeContainer.style.width = "210mm";
+        recipeContainer.style.background = "white";
+        recipeContainer.style.padding = "0";
+
+        let recipeHTML = `
+          <div style="padding: 15px; border: 1px solid #ddd; border-radius: 8px; margin: 0;">
+            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+              ${post.thumbnail_url ? `<div style="flex-shrink: 0;"><img src="${post.thumbnail_url}" alt="${title}" style="max-width: 120px; max-height: 120px; border-radius: 4px; object-fit: cover;"></div>` : ""}
+              <div style="flex: 1;">
+                <h2 style="margin: 0 0 8px 0; font-size: 18px;">${title}</h2>
+                <div style="font-size: 11px; color: #666; margin-bottom: 8px;">
+                  <p style="margin: 0;">📸 @${post.tracked_accounts.username}</p>
+                  <p style="margin: 3px 0 0 0;">❤️ ${post.like_count?.toLocaleString() || "?"} Likes · 💬 ${post.comment_count?.toLocaleString() || "?"} Kommentare</p>
+                </div>
+                ${post.why_it_works ? `<div style="background: #f0f0f0; padding: 8px; border-radius: 4px; font-style: italic; margin: 8px 0; font-size: 11px;"><strong>Warum es gut ankommt:</strong><br>${post.why_it_works}</div>` : ""}
+              </div>
+            </div>
+
+            ${recipe?.ingredients && recipe.ingredients.length > 0 ? `
+              <h3 style="font-size: 14px; margin: 15px 0 8px 0; border-bottom: 2px solid #16a34a; padding-bottom: 4px;">🥘 Zutaten</h3>
+              <ul style="margin: 5px 0; padding-left: 20px;">
+                ${recipe.ingredients.map((ing) => `<li style="margin: 3px 0; font-size: 12px;">${ing}</li>`).join("")}
+              </ul>
+            ` : ""}
+
+            ${recipe?.instructions && recipe.instructions.length > 0 ? `
+              <h3 style="font-size: 14px; margin: 15px 0 8px 0; border-bottom: 2px solid #16a34a; padding-bottom: 4px;">📝 Anleitung</h3>
+              <ol style="margin: 5px 0; padding-left: 20px;">
+                ${recipe.instructions.map((instr) => `<li style="margin: 3px 0; font-size: 12px;">${instr}</li>`).join("")}
+              </ol>
+            ` : ""}
+
+            <div style="font-size: 10px; margin-top: 12px; word-break: break-all;">
+              <strong>Link:</strong> <a href="${post.permalink || "#"}" style="color: #16a34a; text-decoration: none;">${post.permalink || "N/A"}</a>
+            </div>
+          </div>
+        `;
+
+        recipeContainer.innerHTML = recipeHTML;
+        document.body.appendChild(recipeContainer);
+
+        // Convert recipe to canvas
+        const recipeCanvas = await html2canvas(recipeContainer, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: "#ffffff",
+        });
+
+        const recipeHeight = (recipeCanvas.height * PAGE_WIDTH) / recipeCanvas.width / 10; // Convert to mm
+        const recipeImg = recipeCanvas.toDataURL("image/png");
+
+        // Check if recipe fits on current page
+        const BOTTOM_MARGIN = 15;
+        if (yPosition + recipeHeight + BOTTOM_MARGIN > A4_HEIGHT && !isFirstPage) {
+          // Add new page and reset position
+          pdf.addPage();
+          yPosition = 15;
+        }
+
+        // Add recipe to PDF
+        pdf.addImage(recipeImg, "PNG", 0, yPosition, PAGE_WIDTH, recipeHeight);
+        yPosition += recipeHeight + 8; // Add spacing between recipes
+
+        document.body.removeChild(recipeContainer);
       }
 
       // Download PDF
       pdf.save(`rezepte-${new Date().toISOString().split("T")[0]}.pdf`);
-
-      // Clean up
-      document.body.removeChild(tempContainer);
 
       alert(`✅ ${selectedPosts.length} Rezept(e) als PDF exportiert!`);
     } catch (err) {
