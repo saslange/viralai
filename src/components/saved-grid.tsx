@@ -10,6 +10,46 @@ function formatCount(n: number | null) {
   return String(n);
 }
 
+function parseRecipeFromCaption(caption: string | null): { title: string; ingredients: string[]; instructions: string[] } | null {
+  if (!caption) return null;
+
+  const lines = caption.split('\n').map(l => l.trim()).filter(Boolean);
+
+  let title = '';
+  let ingredients: string[] = [];
+  let instructions: string[] = [];
+  let section = 'title';
+
+  for (const line of lines) {
+    const lower = line.toLowerCase();
+
+    if (lower.includes('zutat') || lower.includes('ingredient') || lower.includes('zutaten')) {
+      section = 'ingredients';
+      continue;
+    }
+    if (lower.includes('anleitung') || lower.includes('zubereitung') || lower.includes('instruction') || lower.includes('schritt')) {
+      section = 'instructions';
+      continue;
+    }
+    if (lower.includes('nährwert') || lower.includes('kcal') || lower.includes('kalorien')) {
+      section = 'nutrition';
+      continue;
+    }
+
+    if (section === 'title' && !title && line.length < 100) {
+      title = line;
+    } else if (section === 'ingredients' && (line.startsWith('-') || line.startsWith('•') || /^\d+\./.test(line) || /^[a-z]/.test(line[0]))) {
+      ingredients.push(line.replace(/^[-•\d.]\s*/, ''));
+    } else if (section === 'instructions' && (line.startsWith('-') || line.startsWith('•') || /^\d+\./.test(line) || /^[a-z]/.test(line[0]))) {
+      instructions.push(line.replace(/^[-•\d.]\s*/, ''));
+    }
+  }
+
+  if (!title && ingredients.length === 0 && instructions.length === 0) return null;
+
+  return { title: title || 'Rezept', ingredients, instructions };
+}
+
 export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
 
@@ -22,6 +62,8 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
     if (!selectedLabel) return posts;
     return posts.filter((p) => p.label === selectedLabel);
   }, [posts, selectedLabel]);
+
+  const isRecipeView = selectedLabel === "Rezept";
 
   return (
     <div className="space-y-6">
@@ -54,10 +96,95 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
         </div>
       )}
 
-      {/* Grid */}
-      {filteredPosts.length === 0 ? (
+      {/* Recipe View */}
+      {isRecipeView && filteredPosts.length > 0 ? (
+        <div className="space-y-6">
+          {filteredPosts.map((post) => {
+            const recipe = parseRecipeFromCaption(post.caption);
+            return (
+              <div
+                key={post.id}
+                className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm"
+              >
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  {/* Image */}
+                  <div className="md:col-span-1">
+                    {post.thumbnail_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={post.thumbnail_url}
+                        alt={post.hook ?? ""}
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                  </div>
+
+                  {/* Recipe Details */}
+                  <div className="md:col-span-2 flex flex-col gap-4 p-4">
+                    {/* Header */}
+                    <div>
+                      <h3 className="text-lg font-bold text-neutral-900">
+                        {recipe?.title || post.hook || "Rezept"}
+                      </h3>
+                      <p className="text-xs text-neutral-500 mt-1">
+                        @{post.tracked_accounts.username}
+                      </p>
+                    </div>
+
+                    {/* Ingredients */}
+                    {recipe?.ingredients && recipe.ingredients.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-neutral-700 mb-2">Zutaten:</h4>
+                        <ul className="space-y-1">
+                          {recipe.ingredients.map((ingredient, i) => (
+                            <li key={i} className="text-xs text-neutral-600 flex items-start">
+                              <span className="mr-2">•</span>
+                              <span>{ingredient}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Instructions */}
+                    {recipe?.instructions && recipe.instructions.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-neutral-700 mb-2">Anleitung:</h4>
+                        <ol className="space-y-1">
+                          {recipe.instructions.map((instruction, i) => (
+                            <li key={i} className="text-xs text-neutral-600 flex items-start">
+                              <span className="mr-2 font-semibold">{i + 1}.</span>
+                              <span>{instruction}</span>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    )}
+
+                    {/* Stats & Link */}
+                    <div className="flex items-center justify-between pt-2 border-t border-neutral-100 mt-auto">
+                      <p className="text-[10px] text-neutral-400">
+                        ❤️ {formatCount(post.like_count)} · 💬 {formatCount(post.comment_count)}
+                      </p>
+                      <a
+                        href={post.permalink ?? "#"}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs font-semibold text-neutral-700 hover:text-neutral-900 transition"
+                      >
+                        Video ansehen →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : filteredPosts.length === 0 ? (
         <p className="text-sm text-neutral-500">Keine Posts mit diesem Label.</p>
       ) : (
+        /* Grid View */
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           {filteredPosts.map((post) => (
             <a
