@@ -17,9 +17,15 @@ export async function POST() {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (!posts || posts.length === 0) return NextResponse.json({ categorized: 0 });
 
-  const categories = await categorizeHooks(
-    posts.filter((p) => p.hook).map((p) => ({ id: p.id, hook: p.hook! }))
-  );
+  let categories: Awaited<ReturnType<typeof categorizeHooks>>;
+  try {
+    categories = await categorizeHooks(
+      posts.filter((p) => p.hook).map((p) => ({ id: p.id, hook: p.hook! }))
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Anthropic-API-Fehler";
+    return NextResponse.json({ error: message }, { status: 502 });
+  }
 
   let categorized = 0;
   for (const [id, category] of Object.entries(categories)) {

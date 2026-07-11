@@ -11,11 +11,21 @@ export function AnalyzeButton() {
   async function handleClick() {
     setLoading(true);
     setResult(null);
-    const res = await fetch("/api/analyze", { method: "POST" });
-    const json = await res.json();
-    setLoading(false);
-    setResult(res.ok ? `${json.categorized} Hooks kategorisiert` : json.error ?? "Fehler");
-    router.refresh();
+    try {
+      const res = await fetch("/api/analyze", { method: "POST" });
+      const json = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        setResult(json?.error ?? `Fehler (Status ${res.status})`);
+      } else {
+        setResult(`${json?.categorized ?? 0} Hooks kategorisiert`);
+      }
+      router.refresh();
+    } catch {
+      setResult("Netzwerkfehler — nochmal versuchen");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
