@@ -85,6 +85,7 @@ function parseRecipeFromCaption(caption: string | null, hook: string | null): { 
 
 export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
+  const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
   const [selectedRecipes, setSelectedRecipes] = useState<Set<string>>(new Set());
 
   const labels = useMemo(() => {
@@ -92,10 +93,17 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
     return Array.from(unique).sort();
   }, [posts]);
 
+  const accounts = useMemo(() => {
+    const unique = new Set(posts.map((p) => p.tracked_accounts.username));
+    return Array.from(unique).sort();
+  }, [posts]);
+
   const filteredPosts = useMemo(() => {
-    if (!selectedLabel) return posts;
-    return posts.filter((p) => p.label === selectedLabel);
-  }, [posts, selectedLabel]);
+    let filtered = posts;
+    if (selectedLabel) filtered = filtered.filter((p) => p.label === selectedLabel);
+    if (selectedAccount) filtered = filtered.filter((p) => p.tracked_accounts.username === selectedAccount);
+    return filtered;
+  }, [posts, selectedLabel, selectedAccount]);
 
   const isRecipeFilter = selectedLabel === "Rezept";
 
@@ -136,6 +144,33 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
             }`}
           >
             {label} ({posts.filter((p) => p.label === label).length})
+          </button>
+        ))}
+      </div>
+
+      {/* Account Filter */}
+      <div className="mb-4 flex flex-wrap gap-2">
+        <button
+          onClick={() => setSelectedAccount(null)}
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+            selectedAccount === null
+              ? "bg-neutral-900 text-white"
+              : "border border-neutral-200 text-neutral-700 hover:border-neutral-300"
+          }`}
+        >
+          Alle Accounts ({posts.length})
+        </button>
+        {accounts.map((account) => (
+          <button
+            key={account}
+            onClick={() => setSelectedAccount(account)}
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+              selectedAccount === account
+                ? "bg-neutral-900 text-white"
+                : "border border-neutral-200 text-neutral-700 hover:border-neutral-300"
+            }`}
+          >
+            @{account} ({posts.filter((p) => p.tracked_accounts.username === account).length})
           </button>
         ))}
       </div>
