@@ -230,6 +230,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
     decision: SwipeDecision;
   } | null>(null);
   const [undoing, setUndoing] = useState(false);
+  const [cardWidth, setCardWidth] = useState("65vw");
 
   const recordSwipe = useCallback(async (postId: string, decision: SwipeDecision) => {
     await fetch("/api/swipe", {
@@ -265,6 +266,25 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
     },
     [topPost, handleSwiped]
   );
+
+  useEffect(() => {
+    function handleResize() {
+      if (typeof window !== "undefined") {
+        const width = window.innerWidth;
+        if (width < 640) {
+          setCardWidth("calc(100vw - 16px)");
+        } else if (width < 1024) {
+          setCardWidth("90vw");
+        } else {
+          setCardWidth("65vw");
+        }
+      }
+    }
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -305,7 +325,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="relative" style={{ width: "65vw", height: CARD_HEIGHT }}>
+      <div className="relative" style={{ width: cardWidth, height: CARD_HEIGHT }}>
         {visiblePosts
           .map((post, i) => (
             <div
