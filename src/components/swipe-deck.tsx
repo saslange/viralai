@@ -153,6 +153,20 @@ function Card({
           "{post.hook ?? "Kein Hook erkannt"}"
         </p>
 
+        {/* Hashtags at top */}
+        {hashtags.length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-2">
+            {hashtags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* Stats */}
         <div className="mb-3 grid grid-cols-2 gap-2 text-xs">
           <div>
@@ -194,20 +208,6 @@ function Card({
             <p className="whitespace-pre-line text-xs leading-relaxed text-neutral-600">
               {post.caption}
             </p>
-          </div>
-        )}
-
-        {/* Hashtags at bottom */}
-        {hashtags.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {hashtags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700"
-              >
-                {tag}
-              </span>
-            ))}
           </div>
         )}
       </div>
