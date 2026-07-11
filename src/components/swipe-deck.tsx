@@ -6,6 +6,8 @@ import type { PostWithAccount, SwipeDecision } from "@/lib/types";
 import { PostLightbox } from "@/components/post-lightbox";
 
 const SWIPE_THRESHOLD = 120;
+const CARD_HEIGHT = 640;
+const IMAGE_HEIGHT = 320;
 
 function formatCount(n: number | null) {
   if (n === null) return "–";
@@ -80,6 +82,7 @@ function Card({
       dragElastic={0.9}
       onDrag={handleDrag}
       onDragEnd={handleDragEnd}
+      onTap={() => isTop && onExpand()}
       animate={controls}
       initial={{ scale: 1 }}
     >
@@ -91,14 +94,9 @@ function Card({
         </div>
       )}
 
-      <button
-        type="button"
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={(e) => {
-          e.stopPropagation();
-          onExpand();
-        }}
-        className="group relative block h-full w-full bg-neutral-800"
+      <div
+        className="relative w-full shrink-0 bg-neutral-800"
+        style={{ height: IMAGE_HEIGHT }}
       >
         {post.thumbnail_url || post.media_url ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -116,36 +114,28 @@ function Card({
 
         {post.media_type === "video" && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/50 backdrop-blur transition group-hover:scale-110">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/50 backdrop-blur">
               <div className="ml-1 h-0 w-0 border-y-[10px] border-l-[16px] border-y-transparent border-l-white" />
             </div>
           </div>
         )}
 
-        {/* Instagram-Reels-Style Stats, rechts am Bildrand */}
-        <div className="pointer-events-none absolute bottom-24 right-3 flex flex-col items-center gap-3 text-white drop-shadow">
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="text-xl">❤️</span>
-            <span className="text-xs font-medium">{formatCount(post.like_count)}</span>
-          </div>
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="text-xl">💬</span>
-            <span className="text-xs font-medium">{formatCount(post.comment_count)}</span>
-          </div>
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="text-xl">👁</span>
-            <span className="text-xs font-medium">{formatCount(post.view_count)}</span>
-          </div>
+        <div className="pointer-events-none absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
+          @{post.tracked_accounts.username}
         </div>
+      </div>
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-4 pr-16 text-left">
-          <p className="text-xs font-medium text-neutral-300">@{post.tracked_accounts.username}</p>
-          <p className="mt-1 line-clamp-3 text-sm font-semibold text-neutral-50">
-            {post.hook ?? "Kein Hook erkannt"}
-          </p>
-          <p className="mt-1 text-[11px] text-neutral-400">Antippen zum Ansehen</p>
+      <div className="flex flex-1 flex-col gap-3 overflow-hidden p-4">
+        <div className="flex gap-5 text-sm text-neutral-100">
+          <span>❤️ {formatCount(post.like_count)}</span>
+          <span>💬 {formatCount(post.comment_count)}</span>
+          <span>👁 {formatCount(post.view_count)}</span>
         </div>
-      </button>
+        <p className="line-clamp-[9] whitespace-pre-line text-sm text-neutral-300">
+          {post.caption ?? post.hook ?? "Keine Caption erkannt"}
+        </p>
+        <p className="mt-auto text-[11px] text-neutral-500">Antippen für Video/Vollbild</p>
+      </div>
     </motion.div>
   );
 }
@@ -195,7 +185,10 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
 
   if (!topPost) {
     return (
-      <div className="flex h-[520px] flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-800 text-center">
+      <div
+        className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-neutral-800 text-center"
+        style={{ height: CARD_HEIGHT }}
+      >
         <p className="text-neutral-300">Alle Postings durchgesehen 🎉</p>
         <p className="mt-1 text-sm text-neutral-500">
           Neue Postings kommen mit dem nächsten Sync rein.
@@ -206,7 +199,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="relative h-[520px] w-full max-w-sm">
+      <div className="relative w-full max-w-sm" style={{ height: CARD_HEIGHT }}>
         {visiblePosts
           .map((post, i) => (
             <div
