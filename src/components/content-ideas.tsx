@@ -23,7 +23,22 @@ export function ContentIdeas() {
       if (!res.ok) {
         setError(json?.error ?? `Fehler (Status ${res.status})`);
       } else {
-        setIdeas(json?.ideas ?? []);
+        const generatedIdeas = json?.ideas ?? [];
+        setIdeas(generatedIdeas);
+
+        // Save ideas to archive
+        for (const idea of generatedIdeas) {
+          await fetch("/api/save-idea", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: idea.title,
+              hook: idea.hook,
+              reasoning: idea.reasoning,
+              theme: extractTheme(idea.title),
+            }),
+          });
+        }
       }
     } catch {
       setError("Netzwerkfehler — nochmal versuchen");
@@ -32,12 +47,37 @@ export function ContentIdeas() {
     }
   }
 
+  function extractTheme(title: string): string {
+    const themes: { [key: string]: string } = {
+      story: "Story",
+      frage: "Frage",
+      challenge: "Challenge",
+      tipp: "Tipps",
+      trend: "Trend",
+      kontrover: "Kontrovers",
+      hacks: "Hacks",
+    };
+
+    for (const [key, label] of Object.entries(themes)) {
+      if (title.toLowerCase().includes(key)) return label;
+    }
+    return "Sonstiges";
+  }
+
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-neutral-900">
-          Content-Ideen für @heysash85
-        </h2>
+        <div>
+          <h2 className="text-sm font-semibold text-neutral-900">
+            Content-Ideen für @heysash85
+          </h2>
+          <a
+            href="/analytics/archive"
+            className="mt-1 text-xs text-neutral-500 hover:text-neutral-700 underline"
+          >
+            Zum Archiv →
+          </a>
+        </div>
         <button
           onClick={handleGenerate}
           disabled={loading}
