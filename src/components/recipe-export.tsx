@@ -17,12 +17,17 @@ function parseRecipeFromCaption(caption: string | null, hook: string | null): {
   let ingredients: string[] = [];
   let instructions: string[] = [];
   let section = "title";
+  let foundSectionHeader = false;
+
+  const ingredientPattern = /^\s*[-•*]?\s*(\d+\s*(?:g|kg|ml|l|TL|EL|Prise|Bund|Stück|Dose|Packung|Becher|Glas|Cup|oz|lb)|Ergibt|Der\s|Die\s|Das\s|Eine?\s)/i;
+  const instructionPattern = /^\s*[-•*]?\s*(\d+\.|Schritt|Step|dann|anschliessend|danach)/i;
 
   for (const line of lines) {
     const lower = line.toLowerCase();
 
     if (lower.includes("zutat") || lower.includes("ingredient") || lower.includes("zutaten") || lower.includes("ingredients")) {
       section = "ingredients";
+      foundSectionHeader = true;
       continue;
     }
     if (
@@ -34,6 +39,7 @@ function parseRecipeFromCaption(caption: string | null, hook: string | null): {
       lower.includes("steps")
     ) {
       section = "instructions";
+      foundSectionHeader = true;
       continue;
     }
     if (lower.includes("nährwert") || lower.includes("kcal") || lower.includes("kalorien") || lower.includes("nutrition")) {
@@ -41,17 +47,34 @@ function parseRecipeFromCaption(caption: string | null, hook: string | null): {
       continue;
     }
 
+    if (line.length === 0) continue;
+
     if (section === "title" && !title && line.length < 100 && !line.includes(":")) {
       title = line;
-    } else if (section === "ingredients" && line.length > 0) {
+    } else if (section === "ingredients") {
       const cleaned = line.replace(/^[-•*]\s*/, "").replace(/^\d+\.\s*/, "").trim();
-      if (cleaned && !cleaned.includes("zutaten") && !cleaned.includes("ingredient")) {
+      if (cleaned && !cleaned.toLowerCase().includes("zutaten") && !cleaned.toLowerCase().includes("ingredient")) {
         ingredients.push(cleaned);
       }
-    } else if (section === "instructions" && line.length > 0) {
+    } else if (section === "instructions") {
       const cleaned = line.replace(/^[-•*]\s*/, "").replace(/^\d+\.\s*/, "").trim();
-      if (cleaned && !cleaned.includes("anleitung") && !cleaned.includes("schritt") && !cleaned.includes("instruction")) {
+      if (cleaned && !cleaned.toLowerCase().includes("anleitung") && !cleaned.toLowerCase().includes("schritt") && !cleaned.toLowerCase().includes("instruction") && !cleaned.toLowerCase().includes("zubereitung")) {
         instructions.push(cleaned);
+      }
+    } else if (!foundSectionHeader) {
+      // Heuristic: if no section header found yet, try to detect ingredients/instructions by pattern
+      if (ingredientPattern.test(line)) {
+        section = "ingredients";
+        const cleaned = line.replace(/^[-•*]\s*/, "").replace(/^\d+\.\s*/, "").trim();
+        if (cleaned && !cleaned.toLowerCase().includes("zutaten") && !cleaned.toLowerCase().includes("ingredient")) {
+          ingredients.push(cleaned);
+        }
+      } else if (instructionPattern.test(line)) {
+        section = "instructions";
+        const cleaned = line.replace(/^[-•*]\s*/, "").replace(/^\d+\.\s*/, "").trim();
+        if (cleaned && !cleaned.toLowerCase().includes("anleitung") && !cleaned.toLowerCase().includes("schritt")) {
+          instructions.push(cleaned);
+        }
       }
     }
   }
