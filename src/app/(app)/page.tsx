@@ -12,7 +12,7 @@ export default async function SwipePage({
   const supabase = await createClient();
 
   const [{ data: swiped }, { data: accounts }] = await Promise.all([
-    supabase.from("swipes").select("post_id"),
+    supabase.from("swipes").select("post_id, decision"),
     supabase.from("tracked_accounts").select("*").order("username", { ascending: true }),
   ]);
   const swipedIds = (swiped ?? []).map((s) => s.post_id);
@@ -51,21 +51,21 @@ export default async function SwipePage({
       {/* Tabs */}
       <div className="mb-6 border-b border-neutral-200">
         <div className="flex gap-8">
-          <div className="border-b-2 border-neutral-900 pb-3">
+          <a href="/" className="border-b-2 border-neutral-900 pb-3 transition hover:text-neutral-700">
             <p className="text-sm font-semibold text-neutral-900">
               Swipe <span className="text-neutral-500">{remainingCount ?? 0}</span>
             </p>
-          </div>
-          <div className="pb-3">
+          </a>
+          <a href="/keep" className="pb-3 transition hover:text-neutral-700">
             <p className="text-sm font-medium text-neutral-400">
               Behalten <span className="text-neutral-400">{keepCount}</span>
             </p>
-          </div>
-          <div className="pb-3">
+          </a>
+          <a href="/saved" className="pb-3 transition hover:text-neutral-700">
             <p className="text-sm font-medium text-neutral-400">
               Gemerkt <span className="text-neutral-400">{saveCount}</span>
             </p>
-          </div>
+          </a>
         </div>
       </div>
 
