@@ -5,7 +5,7 @@ import { motion, useAnimation, type PanInfo } from "framer-motion";
 import type { MediaType, PostWithAccount, SwipeDecision } from "@/lib/types";
 
 const SWIPE_THRESHOLD = 120;
-const CARD_HEIGHT = 500;
+const CARD_HEIGHT = 600;
 
 function formatCount(n: number | null) {
   if (n === null) return "–";
@@ -298,7 +298,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="relative w-full max-w-5xl" style={{ height: CARD_HEIGHT }}>
+      <div className="relative w-full max-w-7xl" style={{ height: CARD_HEIGHT }}>
         {visiblePosts
           .map((post, i) => (
             <div
