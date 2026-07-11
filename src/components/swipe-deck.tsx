@@ -3,17 +3,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, useAnimation, type PanInfo } from "framer-motion";
 import type { MediaType, PostWithAccount, SwipeDecision } from "@/lib/types";
-import { PostLightbox } from "@/components/post-lightbox";
 
 const SWIPE_THRESHOLD = 120;
-const CARD_HEIGHT = 640;
-const IMAGE_HEIGHT = 260;
+const CARD_HEIGHT = 500;
 
 function formatCount(n: number | null) {
   if (n === null) return "–";
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
   return String(n);
+}
+
+function extractHashtags(text: string | null): string[] {
+  if (!text) return [];
+  const matches = text.match(/#\w+/g) || [];
+  return matches;
 }
 
 function formatMediaType(type: MediaType) {
@@ -41,30 +45,20 @@ function decisionLabel(decision: SwipeDecision) {
   return { text: "SAVE", color: "text-amber-500 border-amber-500" };
 }
 
-function StatCell({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
-        {label}
-      </p>
-      <p className="mt-0.5 text-sm font-semibold text-neutral-800">{value}</p>
-    </div>
-  );
-}
-
 function Card({
   post,
   onSwiped,
-  onExpand,
+  onShowVideo,
   isTop,
 }: {
   post: PostWithAccount;
   onSwiped: (decision: SwipeDecision) => void;
-  onExpand: () => void;
+  onShowVideo: () => void;
   isTop: boolean;
 }) {
   const controls = useAnimation();
   const [dragDecision, setDragDecision] = useState<SwipeDecision | null>(null);
+  const hashtags = extractHashtags(post.caption || post.hook);
 
   function handleDrag(_: unknown, info: PanInfo) {
     if (!isTop) return;
@@ -106,13 +100,12 @@ function Card({
 
   return (
     <motion.div
-      className="absolute inset-0 flex flex-col overflow-hidden rounded-2xl border border-neutral-300 bg-white shadow-xl shadow-neutral-300/50"
+      className="absolute inset-0 flex gap-0 overflow-hidden rounded-2xl border border-neutral-300 bg-white shadow-xl shadow-neutral-300/50"
       style={{ touchAction: "none" }}
       drag={isTop}
       dragElastic={0.9}
       onDrag={handleDrag}
       onDragEnd={handleDragEnd}
-      onTap={() => isTop && onExpand()}
       animate={controls}
       initial={{ scale: 1 }}
     >
@@ -124,54 +117,67 @@ function Card({
         </div>
       )}
 
-      <div
-        className="relative w-full shrink-0 bg-neutral-100"
-        style={{ height: IMAGE_HEIGHT }}
-      >
+      {/* Left: Media */}
+      <div className="relative w-1/2 min-w-0 bg-black">
         {post.thumbnail_url || post.media_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={post.thumbnail_url ?? post.media_url ?? ""}
-            alt={post.hook ?? "Instagram post"}
-            className="h-full w-full object-cover"
-            draggable={false}
-          />
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={post.thumbnail_url ?? post.media_url ?? ""}
+              alt={post.hook ?? "Instagram post"}
+              className="h-full w-full object-cover"
+              draggable={false}
+            />
+            {post.media_type === "video" && (
+              <button
+                onClick={onShowVideo}
+                className="absolute inset-0 flex items-center justify-center hover:bg-black/20"
+              >
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black/50 backdrop-blur">
+                  <div className="ml-1 h-0 w-0 border-y-[12px] border-l-[20px] border-y-transparent border-l-white" />
+                </div>
+              </button>
+            )}
+          </>
         ) : (
-          <div className="flex h-full items-center justify-center text-neutral-400">
+          <div className="flex h-full items-center justify-center text-neutral-500">
             Kein Bild
           </div>
         )}
-
-        {post.media_type === "video" && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/40 backdrop-blur">
-              <div className="ml-1 h-0 w-0 border-y-[10px] border-l-[16px] border-y-transparent border-l-white" />
-            </div>
-          </div>
-        )}
-
-        <div className="pointer-events-none absolute left-3 top-3 rounded-full bg-neutral-900 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
-          @{post.tracked_accounts.username}
-        </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 overflow-hidden p-4">
-        <p className="font-serif text-lg italic leading-snug text-neutral-900">
-          „{post.hook ?? post.caption ?? "Kein Hook erkannt"}“
+      {/* Right: Info */}
+      <div className="flex w-1/2 min-w-0 flex-col overflow-hidden p-4">
+        {/* Hook */}
+        <p className="mb-3 font-serif text-sm italic leading-snug text-neutral-900">
+          "{post.hook ?? "Kein Hook erkannt"}"
         </p>
 
-        <div className="grid grid-cols-4 gap-2 rounded-lg bg-neutral-50 p-3">
-          <StatCell label="Typ" value={formatMediaType(post.media_type)} />
-          <StatCell label="Reichweite" value={formatCount(post.view_count)} />
-          <StatCell label="Alter" value={formatAge(post.posted_at)} />
-          <StatCell
-            label="Interakt."
-            value={formatCount((post.like_count ?? 0) + (post.comment_count ?? 0))}
-          />
+        {/* Stats */}
+        <div className="mb-3 grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <p className="font-semibold uppercase tracking-wider text-neutral-500">Typ</p>
+            <p className="mt-0.5 text-neutral-800">{formatMediaType(post.media_type)}</p>
+          </div>
+          <div>
+            <p className="font-semibold uppercase tracking-wider text-neutral-500">Reichweite</p>
+            <p className="mt-0.5 text-neutral-800">{formatCount(post.view_count)}</p>
+          </div>
+          <div>
+            <p className="font-semibold uppercase tracking-wider text-neutral-500">Alter</p>
+            <p className="mt-0.5 text-neutral-800">{formatAge(post.posted_at)}</p>
+          </div>
+          <div>
+            <p className="font-semibold uppercase tracking-wider text-neutral-500">Interakt.</p>
+            <p className="mt-0.5 text-neutral-800">
+              {formatCount((post.like_count ?? 0) + (post.comment_count ?? 0))}
+            </p>
+          </div>
         </div>
 
+        {/* Why it works */}
         {post.why_it_works && (
-          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-2.5">
+          <div className="mb-3 rounded bg-neutral-50 p-2">
             <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
               Warum es funktioniert
             </p>
@@ -179,10 +185,19 @@ function Card({
           </div>
         )}
 
-        <p className="line-clamp-2 whitespace-pre-line text-xs text-neutral-500">
-          {post.caption}
-        </p>
-        <p className="mt-auto text-[11px] font-semibold uppercase tracking-wide text-neutral-500">▶ Antippen für Video/Vollbild</p>
+        {/* Hashtags at bottom */}
+        {hashtags.length > 0 && (
+          <div className="mt-auto flex flex-wrap gap-2">
+            {hashtags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </motion.div>
   );
@@ -190,7 +205,7 @@ function Card({
 
 export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] }) {
   const [posts, setPosts] = useState(initialPosts);
-  const [expandedPost, setExpandedPost] = useState<PostWithAccount | null>(null);
+  const [videoPost, setVideoPost] = useState<PostWithAccount | null>(null);
   const [lastAction, setLastAction] = useState<{
     post: PostWithAccount;
     decision: SwipeDecision;
@@ -234,7 +249,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (expandedPost) return;
+      if (videoPost) return;
       if (!topPost) return;
       if (e.key === "ArrowRight") handleButton("keep");
       if (e.key === "ArrowLeft") handleButton("leave");
@@ -243,7 +258,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [topPost, handleButton, expandedPost, handleUndo]);
+  }, [topPost, handleButton, videoPost, handleUndo]);
 
   const visiblePosts = useMemo(() => posts.slice(0, 3), [posts]);
 
@@ -271,7 +286,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="relative w-full max-w-sm" style={{ height: CARD_HEIGHT }}>
+      <div className="relative w-full max-w-2xl" style={{ height: CARD_HEIGHT }}>
         {visiblePosts
           .map((post, i) => (
             <div
@@ -286,7 +301,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
                 post={post}
                 isTop={i === 0}
                 onSwiped={(decision) => handleSwiped(post, decision)}
-                onExpand={() => setExpandedPost(post)}
+                onShowVideo={() => setVideoPost(post)}
               />
             </div>
           ))
@@ -348,11 +363,44 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
         </div>
       </div>
       <p className="text-xs text-neutral-400">
-        Ziehen oder Pfeiltasten: ← Leave · → Keep · ↑ Save · ⌘Z Zurück · Bild antippen für Details
+        Ziehen oder Pfeiltasten: ← Leave · → Keep · ↑ Save · ⌘Z Zurück · Bild antippen für Video
       </p>
 
-      {expandedPost && (
-        <PostLightbox post={expandedPost} onClose={() => setExpandedPost(null)} />
+      {videoPost && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setVideoPost(null)}
+        >
+          <div
+            className="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setVideoPost(null)}
+              className="absolute right-4 top-4 z-10 text-white hover:text-neutral-300"
+            >
+              ✕
+            </button>
+            {videoPost.media_url ? (
+              videoPost.media_type === "video" ? (
+                <video
+                  src={videoPost.media_url}
+                  poster={videoPost.thumbnail_url ?? undefined}
+                  controls
+                  autoPlay
+                  className="h-full w-full"
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={videoPost.media_url}
+                  alt="Post"
+                  className="max-h-[90vh] w-full object-contain"
+                />
+              )
+            ) : null}
+          </div>
+        </div>
       )}
     </div>
   );
