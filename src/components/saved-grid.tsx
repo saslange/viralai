@@ -242,7 +242,7 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
                     {post.label && (
                       <p className={`mb-0.5 inline-block rounded px-1.5 py-0.5 text-[8px] font-bold ${
                         isRecipe
-                          ? "bg-orange-500 text-white"
+                          ? "bg-green-600 text-white"
                           : "bg-neutral-900 text-white"
                       }`}>
                         {post.label}

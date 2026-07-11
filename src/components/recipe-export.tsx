@@ -95,7 +95,7 @@ export function RecipeExport({
             .meta { font-size: 12px; color: #666; margin-bottom: 10px; }
             .hook { background: #f0f0f0; padding: 10px; border-radius: 4px; font-style: italic; margin: 10px 0; }
             .socials { font-size: 12px; margin: 10px 0; }
-            h2 { font-size: 16px; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #ff9800; padding-bottom: 5px; }
+            h2 { font-size: 16px; margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid #16a34a; padding-bottom: 5px; }
             ul { margin: 10px 0; padding-left: 20px; }
             li { margin: 5px 0; }
             ol { margin: 10px 0; padding-left: 20px; }
@@ -103,7 +103,7 @@ export function RecipeExport({
           </style>
         </head>
         <body>
-          <h1 style="text-align: center; color: #ff9800; margin-bottom: 40px;">🍳 Mein Rezept Archiv</h1>
+          <h1 style="text-align: center; color: #16a34a; margin-bottom: 40px;">🍳 Mein Rezept Archiv</h1>
       `;
 
       for (const post of selectedPosts) {
@@ -173,14 +173,14 @@ export function RecipeExport({
   }
 
   return (
-    <div className="mb-4 flex items-center justify-between rounded-lg border border-orange-200 bg-orange-50 p-3">
+    <div className="mb-4 flex items-center justify-between rounded-lg border border-green-200 bg-green-50 p-3">
       <div className="text-sm text-neutral-700">
         <strong>{selectedRecipes.size}</strong> von <strong>{recipes.length}</strong> Rezepten ausgewählt
       </div>
       <button
         onClick={handleExportPDF}
         disabled={exporting || selectedRecipes.size === 0}
-        className="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-orange-600 disabled:opacity-50"
+        className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-green-700 disabled:opacity-50"
       >
         {exporting ? "Exportiere..." : "📥 Als HTML exportieren"}
       </button>
