@@ -71,12 +71,14 @@ function normalizeItem(item: Record<string, unknown>): NormalizedPost | null {
   };
 }
 
-export async function fetchUserPosts(username: string): Promise<NormalizedPost[]> {
+export async function fetchUserPosts(username: string, options?: { since_date?: Date }): Promise<NormalizedPost[]> {
   const apiKey = process.env.SCRAPECREATORS_API_KEY;
   if (!apiKey) throw new Error("SCRAPECREATORS_API_KEY ist nicht gesetzt");
 
-  const url = `${API_BASE}?handle=${encodeURIComponent(username)}`;
-  const res = await fetch(url, {
+  const url = new URL(`${API_BASE}`);
+  url.searchParams.set("handle", username);
+
+  const res = await fetch(url.toString(), {
     headers: { "x-api-key": apiKey },
     cache: "no-store",
   });
@@ -86,7 +88,17 @@ export async function fetchUserPosts(username: string): Promise<NormalizedPost[]
   }
 
   const json = await res.json();
-  const items: Record<string, unknown>[] = json.items ?? json.data ?? json.posts ?? [];
+  let items: Record<string, unknown>[] = json.items ?? json.data ?? json.posts ?? [];
+
+  // Filter by date if since_date is provided
+  if (options?.since_date) {
+    const sinceTime = options.since_date.getTime();
+    items = items.filter((item) => {
+      const postTime = toIsoDate(item.taken_at ?? item.taken_at_timestamp ?? item.timestamp);
+      if (!postTime) return true; // Include if date is unknown
+      return new Date(postTime).getTime() >= sinceTime;
+    });
+  }
 
   return items.map(normalizeItem).filter((p): p is NormalizedPost => p !== null);
 }

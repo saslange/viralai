@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchUserPosts, extractHook } from "@/lib/scrapecreators";
 
-export const maxDuration = 60;
+export const maxDuration = 300; // 5 minutes for full scrape
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const supabase = createAdminClient();
   const { data: accounts, error } = await supabase
     .from("tracked_accounts")
-    .select("id, username, last_synced_at")
+    .select("id, username")
     .eq("is_active", true);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -22,9 +22,8 @@ export async function GET(request: Request) {
 
   for (const account of accounts ?? []) {
     try {
-      // Use last_synced_at as since_date to only fetch new posts
-      const since_date = account.last_synced_at ? new Date(account.last_synced_at) : undefined;
-      const posts = await fetchUserPosts(account.username, { since_date });
+      // Full scrape without date filter - fetch ALL posts
+      const posts = await fetchUserPosts(account.username);
 
       if (posts.length > 0) {
         const rows = posts.map((post) => ({
@@ -64,5 +63,5 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({ results });
+  return NextResponse.json({ results, mode: "full_sync" });
 }
