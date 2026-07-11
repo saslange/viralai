@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import type { PostWithAccount } from "@/lib/types";
+import { RecipeExport } from "./recipe-export";
 
 function formatCount(n: number | null) {
   if (n === null) return "–";
@@ -52,6 +53,7 @@ function parseRecipeFromCaption(caption: string | null): { title: string; ingred
 
 export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
+  const [selectedRecipes, setSelectedRecipes] = useState<Set<string>>(new Set());
 
   const labels = useMemo(() => {
     const unique = new Set(posts.map((p) => p.label).filter(Boolean));
@@ -62,6 +64,18 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
     if (!selectedLabel) return posts;
     return posts.filter((p) => p.label === selectedLabel);
   }, [posts, selectedLabel]);
+
+  const isRecipeFilter = selectedLabel === "Rezept";
+
+  const toggleRecipe = (postId: string) => {
+    const newSet = new Set(selectedRecipes);
+    if (newSet.has(postId)) {
+      newSet.delete(postId);
+    } else {
+      newSet.add(postId);
+    }
+    setSelectedRecipes(newSet);
+  };
 
   const isRecipeView = selectedLabel === "Rezept";
 
@@ -93,6 +107,14 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
           </button>
         ))}
       </div>
+
+      {/* Export Bar for Recipe Filter */}
+      {isRecipeFilter && filteredPosts.length > 0 && (
+        <RecipeExport
+          recipes={filteredPosts}
+          selectedRecipes={selectedRecipes}
+        />
+      )}
 
       {/* Recipe View */}
       {isRecipeView && filteredPosts.length > 0 ? (
@@ -184,40 +206,60 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
       ) : (
         /* Grid View */
         <div className="grid grid-cols-[repeat(5,minmax(0,1fr))] gap-2">
-          {filteredPosts.map((post) => (
-            <a
-              key={post.id}
-              href={post.permalink ?? "#"}
-              target="_blank"
-              rel="noreferrer"
-              className="group flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm transition hover:shadow-md"
-            >
-              <div className="aspect-square w-full bg-neutral-100">
-                {post.thumbnail_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={post.thumbnail_url}
-                    alt={post.hook ?? ""}
-                    className="h-full w-full object-cover object-center transition group-hover:scale-105"
+          {filteredPosts.map((post) => {
+            const isSelected = selectedRecipes.has(post.id);
+            const isRecipe = post.label === "Rezept";
+            return (
+              <div
+                key={post.id}
+                className="relative group"
+              >
+                {isRecipeFilter && (
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => toggleRecipe(post.id)}
+                    className="absolute top-2 left-2 z-10 h-4 w-4 cursor-pointer rounded border-neutral-300"
                   />
                 )}
+                <a
+                  href={post.permalink ?? "#"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-sm transition hover:shadow-md h-full"
+                >
+                  <div className="aspect-square w-full bg-neutral-100 relative">
+                    {post.thumbnail_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={post.thumbnail_url}
+                        alt={post.hook ?? ""}
+                        className="h-full w-full object-cover object-center transition group-hover:scale-105"
+                      />
+                    )}
+                  </div>
+                  <div className="flex flex-1 flex-col p-1.5">
+                    {post.label && (
+                      <p className={`mb-0.5 inline-block rounded px-1.5 py-0.5 text-[8px] font-bold ${
+                        isRecipe
+                          ? "bg-orange-500 text-white"
+                          : "bg-neutral-900 text-white"
+                      }`}>
+                        {post.label}
+                      </p>
+                    )}
+                    <p className="truncate text-[8px] font-semibold text-neutral-900">
+                      @{post.tracked_accounts.username}
+                    </p>
+                    <p className="line-clamp-1 text-[8px] text-neutral-600">{post.hook}</p>
+                    <p className="mt-auto text-[7px] text-neutral-400">
+                      ❤️ {formatCount(post.like_count)} · 💬 {formatCount(post.comment_count)}
+                    </p>
+                  </div>
+                </a>
               </div>
-              <div className="flex flex-1 flex-col p-1.5">
-                {post.label && (
-                  <p className="mb-0.5 inline-block rounded bg-neutral-900 px-1.5 py-0.5 text-[8px] font-bold text-white">
-                    {post.label}
-                  </p>
-                )}
-                <p className="truncate text-[8px] font-semibold text-neutral-900">
-                  @{post.tracked_accounts.username}
-                </p>
-                <p className="line-clamp-1 text-[8px] text-neutral-600">{post.hook}</p>
-                <p className="mt-auto text-[7px] text-neutral-400">
-                  ❤️ {formatCount(post.like_count)} · 💬 {formatCount(post.comment_count)}
-                </p>
-              </div>
-            </a>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
