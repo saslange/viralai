@@ -171,7 +171,7 @@ function Card({
       {/* Right: Info (scrollable) - max 75% width */}
       <div className="flex w-full max-w-[75%] flex-col overflow-y-auto p-4">
         {/* Hook */}
-        <p className="mb-3 font-serif text-sm italic leading-snug text-neutral-900">
+        <p className="mb-3 font-serif text-base italic leading-snug text-neutral-900">
           "{post.hook ?? "Kein Hook erkannt"}"
         </p>
 
@@ -181,7 +181,7 @@ function Card({
             {hashtags.map((tag) => (
               <span
                 key={tag}
-                className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700"
+                className="rounded bg-blue-100 px-2 py-1 text-sm font-medium text-blue-700"
               >
                 {tag}
               </span>
@@ -190,7 +190,7 @@ function Card({
         )}
 
         {/* Meta Info */}
-        <div className="mb-3 flex gap-2 text-[10px] text-neutral-500">
+        <div className="mb-3 flex gap-2 text-xs text-neutral-500">
           <span>{formatMediaType(post.media_type)}</span>
           <span>•</span>
           <span>{formatAge(post.posted_at)}</span>
@@ -199,20 +199,20 @@ function Card({
         {/* Why it works */}
         {post.why_it_works && (
           <div className="mb-3 rounded bg-neutral-50 p-3">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+            <p className="text-xs font-bold uppercase tracking-wider text-neutral-500">
               Warum es funktioniert
             </p>
-            <p className="mt-2 text-xs leading-relaxed text-neutral-700">{post.why_it_works}</p>
+            <p className="mt-2 text-sm leading-relaxed text-neutral-700">{post.why_it_works}</p>
           </div>
         )}
 
         {/* Caption */}
         {post.caption && (
           <div className="mb-3">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-2">
+            <p className="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2">
               Caption
             </p>
-            <p className="whitespace-pre-line text-xs leading-relaxed text-neutral-600">
+            <p className="whitespace-pre-line text-sm leading-relaxed text-neutral-600">
               {post.caption}
             </p>
           </div>
@@ -305,7 +305,7 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="relative" style={{ width: "90vw", height: CARD_HEIGHT }}>
+      <div className="relative" style={{ width: "75vw", height: CARD_HEIGHT }}>
         {visiblePosts
           .map((post, i) => (
             <div
