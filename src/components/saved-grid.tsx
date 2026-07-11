@@ -86,6 +86,7 @@ function parseRecipeFromCaption(caption: string | null, hook: string | null): { 
 export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
+  const [selectedMediaType, setSelectedMediaType] = useState<string | null>(null);
   const [selectedRecipes, setSelectedRecipes] = useState<Set<string>>(new Set());
 
   const labels = useMemo(() => {
@@ -98,12 +99,18 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
     return Array.from(unique).sort();
   }, [posts]);
 
+  const mediaTypes = useMemo(() => {
+    const unique = new Set(posts.map((p) => p.media_type));
+    return Array.from(unique).sort();
+  }, [posts]);
+
   const filteredPosts = useMemo(() => {
     let filtered = posts;
     if (selectedLabel) filtered = filtered.filter((p) => p.label === selectedLabel);
     if (selectedAccount) filtered = filtered.filter((p) => p.tracked_accounts.username === selectedAccount);
+    if (selectedMediaType) filtered = filtered.filter((p) => p.media_type === selectedMediaType);
     return filtered;
-  }, [posts, selectedLabel, selectedAccount]);
+  }, [posts, selectedLabel, selectedAccount, selectedMediaType]);
 
   const isRecipeFilter = selectedLabel === "Rezept";
 
@@ -173,6 +180,37 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
             @{account} ({posts.filter((p) => p.tracked_accounts.username === account).length})
           </button>
         ))}
+      </div>
+
+      {/* Media Type Filter */}
+      <div className="mb-4 flex flex-wrap gap-2">
+        <button
+          onClick={() => setSelectedMediaType(null)}
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+            selectedMediaType === null
+              ? "bg-neutral-900 text-white"
+              : "border border-neutral-200 text-neutral-700 hover:border-neutral-300"
+          }`}
+        >
+          Alle Medien ({posts.length})
+        </button>
+        {mediaTypes.map((type) => {
+          const emoji = type === "video" ? "🎬" : type === "carousel" ? "📸" : "🖼️";
+          const label = type === "video" ? "Videos" : type === "carousel" ? "Carousels" : "Bilder";
+          return (
+            <button
+              key={type}
+              onClick={() => setSelectedMediaType(type)}
+              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                selectedMediaType === type
+                  ? "bg-neutral-900 text-white"
+                  : "border border-neutral-200 text-neutral-700 hover:border-neutral-300"
+              }`}
+            >
+              {emoji} {label} ({posts.filter((p) => p.media_type === type).length})
+            </button>
+          );
+        })}
       </div>
 
       {/* Export Bar for Recipe Filter */}
