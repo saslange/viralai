@@ -66,35 +66,33 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
   const isRecipeView = selectedLabel === "Rezept";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Label Filter */}
-      {labels.length > 0 && (
-        <div className="flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-wrap gap-2">
+        <button
+          onClick={() => setSelectedLabel(null)}
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+            selectedLabel === null
+              ? "bg-neutral-900 text-white"
+              : "border border-neutral-200 text-neutral-700 hover:border-neutral-300"
+          }`}
+        >
+          Alle ({posts.length})
+        </button>
+        {labels.map((label) => (
           <button
-            onClick={() => setSelectedLabel(null)}
+            key={label}
+            onClick={() => setSelectedLabel(label)}
             className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-              selectedLabel === null
+              selectedLabel === label
                 ? "bg-neutral-900 text-white"
                 : "border border-neutral-200 text-neutral-700 hover:border-neutral-300"
             }`}
           >
-            Alle ({posts.length})
+            {label} ({posts.filter((p) => p.label === label).length})
           </button>
-          {labels.map((label) => (
-            <button
-              key={label}
-              onClick={() => setSelectedLabel(label)}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-                selectedLabel === label
-                  ? "bg-neutral-900 text-white"
-                  : "border border-neutral-200 text-neutral-700 hover:border-neutral-300"
-              }`}
-            >
-              {label} ({posts.filter((p) => p.label === label).length})
-            </button>
-          ))}
-        </div>
-      )}
+        ))}
+      </div>
 
       {/* Recipe View */}
       {isRecipeView && filteredPosts.length > 0 ? (
@@ -204,17 +202,17 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
                   />
                 )}
               </div>
-              <div className="flex flex-1 flex-col p-1.5">
-                <p className="text-[10px] font-semibold text-neutral-900 truncate">
+              <div className="flex flex-1 flex-col p-1">
+                <p className="truncate text-[9px] font-semibold text-neutral-900">
                   @{post.tracked_accounts.username}
                 </p>
-                <p className="line-clamp-1 text-[10px] text-neutral-600">{post.hook}</p>
+                <p className="line-clamp-1 text-[9px] text-neutral-600">{post.hook}</p>
                 {post.label && (
-                  <p className="mt-0.5 inline-block rounded bg-neutral-100 px-1.5 py-0.5 text-[8px] font-semibold text-neutral-600 truncate">
+                  <p className="mt-0.5 inline-block truncate rounded bg-neutral-100 px-1 py-0.5 text-[7px] font-semibold text-neutral-600">
                     {post.label}
                   </p>
                 )}
-                <p className="mt-auto pt-0.5 text-[8px] text-neutral-400">
+                <p className="mt-auto text-[7px] text-neutral-400">
                   ❤️ {formatCount(post.like_count)} · 💬 {formatCount(post.comment_count)}
                 </p>
               </div>
