@@ -137,21 +137,21 @@ export function SavedGrid({ posts }: { posts: PostWithAccount[] }) {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  {/* Image */}
-                  <div className="md:col-span-1">
+                <div className="flex flex-col gap-4 md:flex-row md:gap-4">
+                  {/* Image - Smaller Square */}
+                  <div className="w-full md:w-48 md:flex-shrink-0">
                     {post.thumbnail_url && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={post.thumbnail_url}
                         alt={post.hook ?? ""}
-                        className="h-full w-full object-cover"
+                        className="aspect-square w-full object-cover rounded-lg"
                       />
                     )}
                   </div>
 
                   {/* Recipe Details */}
-                  <div className="md:col-span-2 flex flex-col gap-4 p-4">
+                  <div className="flex flex-col gap-4 p-4 flex-1">
                     {/* Header */}
                     <div>
                       <h3 className="text-lg font-bold text-neutral-900">
