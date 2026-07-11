@@ -297,8 +297,8 @@ export function SwipeDeck({ initialPosts }: { initialPosts: PostWithAccount[] })
   }
 
   return (
-    <div className="flex flex-col items-center gap-6">
-      <div className="relative w-full max-w-7xl" style={{ height: CARD_HEIGHT }}>
+    <div className="flex flex-col items-center gap-6 px-4">
+      <div className="relative w-full" style={{ height: CARD_HEIGHT }}>
         {visiblePosts
           .map((post, i) => (
             <div
